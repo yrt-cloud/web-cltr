@@ -106,6 +106,7 @@
             height: 30px;
             color: #94a3b8;
             transition: color 0.2s;
+            z-index: 2;
         }
 
         .btn-delete-master:hover { color: var(--danger); }
@@ -363,7 +364,7 @@
         }
     </style>
 </head>
-<body>
+<body onload="init()">
 
 <div class="save-indicator no-print">
     <div style="width: 6px; height: 6px; background: var(--success); border-radius: 50%;"></div>
@@ -514,7 +515,6 @@
             <div class="report-section">
                 <h4 style="font-size: 13px; margin-bottom: 10px; color: var(--dark);">REKAPITULASI PENJUALAN HARIAN</h4>
                 <div id="dailyReportContainer" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
-                    <!-- Report items will go here -->
                 </div>
             </div>
         </div>
@@ -542,7 +542,6 @@
     let currentTrxId = "";
 
     function init() {
-        // Load data from LocalStorage
         const localMaster = localStorage.getItem('master_items');
         if(localMaster) masterData = JSON.parse(localMaster);
         
@@ -562,7 +561,7 @@
         renderHistory();
     }
 
-    // BACKUP & RESTORE SYSTEM
+    // BACKUP & RESTORE
     function exportData() {
         const data = {
             master_items: masterData,
@@ -580,14 +579,11 @@
         URL.revokeObjectURL(url);
     }
 
-    function triggerRestore() {
-        document.getElementById('restoreFile').click();
-    }
+    function triggerRestore() { document.getElementById('restoreFile').click(); }
 
     function handleRestore(input) {
         const file = input.files[0];
         if (!file) return;
-        
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
@@ -599,20 +595,14 @@
                     localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
                     localStorage.setItem('shop_name', data.shop_name || "");
                     localStorage.setItem('shop_addr', data.shop_addr || "");
-                    alert("Data berhasil dipulihkan!");
                     location.reload();
                 }
-            } catch (err) {
-                alert("File backup tidak valid.");
-            }
+            } catch (err) { alert("File backup tidak valid."); }
         };
         reader.readAsText(file);
     }
 
-    // CORE FUNCTIONS
-    function format(n) { 
-        return Number(n).toLocaleString('id-ID', { maximumFractionDigits: 2 }); 
-    }
+    function format(n) { return Number(n).toLocaleString('id-ID'); }
 
     function newTransaction() {
         cart = [];
@@ -646,17 +636,25 @@
         toggleSettings();
     }
 
+    // MASTER BARANG FUNCTIONS
     function renderMaster() {
         const query = document.getElementById('searchBar').value.toLowerCase();
         const container = document.getElementById('masterItems');
         container.innerHTML = "";
-        masterData.filter(i => i.name.toLowerCase().includes(query)).sort((a,b) => a.name.localeCompare(b.name)).forEach((item, index) => {
+        
+        // Filter master data
+        const filtered = masterData.filter(i => i.name.toLowerCase().includes(query))
+                                   .sort((a,b) => a.name.localeCompare(b.name));
+
+        filtered.forEach((item) => {
             const div = document.createElement('div');
             div.className = "master-item";
-            div.onclick = (e) => { if (!e.target.closest('.btn-delete-master')) addToCart(item.name, item.price); };
+            div.onclick = (e) => { 
+                if (!e.target.closest('.btn-delete-master')) addToCart(item.name, item.price); 
+            };
             div.innerHTML = `
                 <div class="master-item-info"><b>${item.name}</b><span>Rp ${format(item.price)}</span></div>
-                <div class="btn-delete-master" onclick="deleteFromMaster(${index})">${trashIcon}</div>
+                <div class="btn-delete-master" onclick="deleteFromMaster('${item.name.replace(/'/g, "\\'")}')">${trashIcon}</div>
                 <div style="color: var(--success); font-size: 18px; margin-left: 10px;">+</div>`;
             container.appendChild(div);
         });
@@ -664,6 +662,7 @@
 
     function addManual() {
         const n = prompt("Nama Barang:").toUpperCase();
+        if(!n) return;
         const p = parseFloat(prompt("Harga:"));
         if(n && !isNaN(p)) {
             masterData.push({name: n, price: p});
@@ -672,9 +671,10 @@
         }
     }
 
-    function deleteFromMaster(index) {
-        if(confirm("Hapus barang dari master?")) {
-            masterData.splice(index, 1);
+    function deleteFromMaster(name) {
+        if(confirm(`Hapus "${name}" dari master?`)) {
+            // Hapus berdasarkan nama agar tidak salah index saat sedang di-filter
+            masterData = masterData.filter(item => item.name !== name);
             localStorage.setItem('master_items', JSON.stringify(masterData));
             renderMaster();
         }
@@ -688,6 +688,7 @@
     }
 
     function removeCart(idx) { cart.splice(idx, 1); renderCart(); }
+    
     function updateQty(idx, delta) {
         cart[idx].qty += delta;
         if(cart[idx].qty <= 0) cart.splice(idx, 1);
@@ -708,8 +709,8 @@
                 <div class="cart-bottom">
                     <span class="qty-badge">${item.qty}</span> x ${format(item.price)}
                     <div class="no-print" style="margin-left: 10px; display:flex; gap: 5px;">
-                        <button onclick="updateQty(${i}, -1)" style="padding:0 5px;">-</button>
-                        <button onclick="updateQty(${i}, 1)" style="padding:0 5px;">+</button>
+                        <button onclick="updateQty(${i}, -1)" style="padding:0 5px; cursor:pointer;">-</button>
+                        <button onclick="updateQty(${i}, 1)" style="padding:0 5px; cursor:pointer;">+</button>
                     </div>
                     <span class="btn-remove no-print" onclick="removeCart(${i})">${trashIcon}</span>
                 </div>`;
@@ -737,39 +738,28 @@
     function processPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         let cashRaw = document.getElementById('cashInput').value;
-        let cash = parseFloat(cashRaw.replace(',', '.'));
+        let cash = parseFloat(cashRaw.replace(/\./g, ''));
         if(isNaN(cash)) return;
-
-        // Auto-kilo shortcut
         if(cash < total && cash > 0 && cash < 1000) cash *= 1000;
-
         if(cash >= total) {
-            const cashVal = cash;
-            const changeVal = cash - total;
-            
-            // Simpan ke Riwayat
             const now = new Date();
             const trx = {
                 id: currentTrxId,
                 date: now.toLocaleString('id-ID'),
-                dateKey: now.toLocaleDateString('id-ID'), // Untuk pengelompokan harian
+                dateKey: now.toLocaleDateString('id-ID'),
                 items: JSON.parse(JSON.stringify(cart)),
                 total: total,
-                cash: cashVal,
-                change: changeVal
+                cash: cash,
+                change: cash - total
             };
             transactionHistory.unshift(trx);
             localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
-            
-            document.getElementById('resCash').innerText = format(cashVal);
-            document.getElementById('resChange').innerText = format(changeVal);
+            document.getElementById('resCash').innerText = format(cash);
+            document.getElementById('resChange').innerText = format(cash - total);
             document.getElementById('paymentResult').style.display = 'block';
-            
             renderHistory();
             closePayModal();
-        } else {
-            alert("Uang tunai kurang!");
-        }
+        } else { alert("Uang tunai kurang!"); }
     }
 
     function renderHistory() {
@@ -784,182 +774,104 @@
                 <div class="trx-card-footer">
                     <button class="btn-reprint" onclick="reprintTrx(${index})">MUAT & CETAK</button>
                     <span style="color:var(--danger); cursor:pointer;" onclick="deleteTrx(${index})">${trashIcon}</span>
-                </div>
-            `;
+                </div>`;
             log.appendChild(div);
         });
+    }
+
+    function reprintTrx(idx) {
+        const trx = transactionHistory[idx];
+        cart = JSON.parse(JSON.stringify(trx.items));
+        currentTrxId = trx.id;
+        document.getElementById('trxId').innerText = trx.id;
+        document.getElementById('trxDate').innerText = trx.date;
+        document.getElementById('resCash').innerText = format(trx.cash);
+        document.getElementById('resChange').innerText = format(trx.change);
+        document.getElementById('paymentResult').style.display = 'block';
+        document.getElementById('summaryArea').style.display = 'block';
+        renderCart();
+    }
+
+    function deleteTrx(idx) {
+        if(confirm("Hapus transaksi ini dari riwayat?")) {
+            transactionHistory.splice(idx, 1);
+            localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
+            renderHistory();
+        }
+    }
+
+    function clearAllHistory() {
+        if(confirm("Hapus seluruh riwayat transaksi?")) {
+            transactionHistory = [];
+            localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
+            renderHistory();
+        }
     }
 
     function renderDailyReport() {
         const container = document.getElementById('dailyReportContainer');
         container.innerHTML = "";
-        
         const grouped = {};
         transactionHistory.forEach(trx => {
-            const key = trx.dateKey || trx.date.split(',')[0];
+            const key = trx.dateKey || trx.date.split(' ')[0];
             if (!grouped[key]) grouped[key] = { list: [], total: 0 };
             grouped[key].list.push(trx);
             grouped[key].total += trx.total;
         });
-
-        const sortedKeys = Object.keys(grouped).sort((a,b) => {
-            const da = a.split('/').reverse().join('');
-            const db = b.split('/').reverse().join('');
-            return db.localeCompare(da);
-        });
-
+        const sortedKeys = Object.keys(grouped).sort((a,b) => b.localeCompare(a));
         if (sortedKeys.length === 0) {
-            container.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:20px; font-size:12px;'>Belum ada data transaksi.</p>";
+            container.innerHTML = "<p style='text-align:center; padding:20px; color:#94a3b8;'>Belum ada transaksi</p>";
             return;
         }
-
-        sortedKeys.forEach(date => {
-            const data = grouped[date];
-            const groupDiv = document.createElement('div');
-            groupDiv.className = "date-group";
-            
-            let itemsHtml = "";
-            data.list.forEach(trx => {
-                itemsHtml += `
-                    <div class="report-item">
-                        <span>${trx.id}</span>
-                        <span>Rp ${format(trx.total)}</span>
-                    </div>`;
-            });
-
-            groupDiv.innerHTML = `
-                <div class="date-header">
-                    <span>📅 ${date}</span>
-                    <div style="display:flex; align-items:center;">
-                        <span class="date-total">Rp ${format(data.total)}</span>
-                        <button class="btn-print-rekap" onclick="prepareRekapPrint('${date}')">CETAK STRUK</button>
-                    </div>
-                </div>
-                <div class="date-items">${itemsHtml}</div>
-            `;
-            container.appendChild(groupDiv);
-        });
-    }
-
-    // FUNGSI UNTUK MENYIAPKAN STRUK REKAP HARIAN
-    function prepareRekapPrint(dateKey) {
-        const grouped = {};
-        transactionHistory.forEach(trx => {
-            const key = trx.dateKey || trx.date.split(',')[0];
-            if (!grouped[key]) grouped[key] = { list: [], total: 0 };
-            grouped[key].list.push(trx);
-            grouped[key].total += trx.total;
-        });
-
-        const data = grouped[dateKey];
-        if(!data) return;
-
-        // Tutup modal agar tidak ikut terprint
-        toggleSettings();
-
-        // Siapkan tampilan struk khusus rekap
-        document.getElementById('trxId').innerText = "LAPORAN HARIAN";
-        document.getElementById('trxDate').innerText = dateKey;
-        
-        const container = document.getElementById('cartContent');
-        container.innerHTML = `<p style="text-align:center; font-weight:bold; margin-bottom:10px;">REKAP PENJUALAN</p>`;
-        
-        data.list.forEach(trx => {
+        sortedKeys.forEach(key => {
             const div = document.createElement('div');
-            div.className = "cart-row";
-            div.style.marginBottom = "5px";
+            div.className = "date-group";
             div.innerHTML = `
-                <div class="cart-top" style="font-size:10px;">
-                    <span>${trx.id}</span>
-                    <span>${format(trx.total)}</span>
-                </div>
+                <div class="date-header"><span>${key}</span><span class="date-total">Rp ${format(grouped[key].total)}</span></div>
+                ${grouped[key].list.map(t => `<div class="report-item"><span>${t.id}</span><span>${format(t.total)}</span></div>`).join('')}
             `;
             container.appendChild(div);
         });
-
-        document.getElementById('totalQty').innerText = data.list.length + " Trx";
-        document.getElementById('grandTotal').innerText = format(data.total);
-        document.getElementById('paymentResult').style.display = 'none';
-        
-        // Beri jeda sedikit agar DOM terupdate sebelum print
-        setTimeout(() => {
-            window.print();
-            // Setelah print, kembalikan ke mode transaksi baru untuk kenyamanan
-            newTransaction();
-        }, 300);
     }
 
-    function reprintTrx(index) {
-        const trx = transactionHistory[index];
-        cart = trx.items;
-        currentTrxId = trx.id;
-        document.getElementById('trxId').innerText = trx.id;
-        document.getElementById('trxDate').innerText = trx.date;
-        document.getElementById('summaryArea').style.display = 'block';
-        renderCart();
-        document.getElementById('resCash').innerText = format(trx.cash);
-        document.getElementById('resChange').innerText = format(trx.change);
-        document.getElementById('paymentResult').style.display = 'block';
+    // CALCULATOR FUNCTIONS
+    function num(v) { 
+        if(currentCalc === "0") currentCalc = v; else currentCalc += v;
+        updateCalc();
     }
-
-    function deleteTrx(index) {
-        if(confirm("Hapus riwayat transaksi ini?")) {
-            transactionHistory.splice(index, 1);
-            localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
-            renderHistory();
-            renderDailyReport();
-        }
-    }
-
-    function clearAllHistory() {
-        if(confirm("Hapus SEMUA riwayat transaksi secara permanen?")) {
-            transactionHistory = [];
-            localStorage.removeItem('trx_history');
-            renderHistory();
-            renderDailyReport();
-        }
-    }
-
-    function printStruk() {
-        if(cart.length === 0) return;
-        window.print();
-    }
-
-    // CALCULATOR CORE
-    function num(v) { if(currentCalc === "0") currentCalc = v; else currentCalc += v; updateCalc(); }
     function op(o) { currentCalc += " " + o + " "; updateCalc(); }
     function clearCalc() { currentCalc = "0"; updateCalc(); }
-    function backspace() { currentCalc = currentCalc.toString().trim().slice(0, -1) || "0"; updateCalc(); }
+    function backspace() { 
+        currentCalc = currentCalc.trim();
+        currentCalc = currentCalc.slice(0, -1) || "0"; 
+        updateCalc(); 
+    }
     function updateCalc() { document.getElementById('calcDisplay').innerText = currentCalc; }
-
+    
     function addToCartManual() {
         try {
-            const val = eval(currentCalc.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-'));
-            if(val > 0) {
-                addToCart("ITEM NON-MASTER", val);
+            const price = eval(currentCalc.replace(/[^-()\d/*+.]/g, ''));
+            if(price > 0) {
+                addToCart("ITEM MANUAL", price);
                 clearCalc();
             }
-        } catch(e) { alert("Format hitungan salah"); }
+        } catch(e) { alert("Format kalkulator salah"); }
     }
 
-    // KEYBOARD LISTENER
+    function printStruk() { window.print(); }
+
+    // KEYBOARD SHORTCUTS
     window.addEventListener('keydown', (e) => {
         if(isModalOpen) {
-            if(e.key === "Enter") {
-                if (document.activeElement.id === "cashInput") processPayment();
-            }
-            if(e.key === "Escape") { closePayModal(); document.getElementById('settingsModal').style.display='none'; isModalOpen=false; }
+            if(e.key === "Escape") closePayModal();
+            if(e.key === "Enter") processPayment();
             return;
         }
-        if(e.key === " ") { e.preventDefault(); openPayModal(); }
-        if(e.key.toLowerCase() === "p") printStruk();
-        if(e.key.toLowerCase() === "r") resetTransaction();
-        if(e.key >= "0" && e.key <= "9") num(e.key);
-        if(e.key === "Enter") addToCartManual();
-        if(e.key === "Backspace") backspace();
+        if(e.key === " " || e.code === "Space") { e.preventDefault(); openPayModal(); }
+        if(e.key === "p" || e.key === "P") printStruk();
+        if(e.key === "r" || e.key === "R") resetTransaction();
     });
-
-    window.onload = init;
 </script>
+
 </body>
 </html>
