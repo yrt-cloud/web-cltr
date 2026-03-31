@@ -200,25 +200,51 @@
                 width: 100%;
                 border-radius: 0;
                 margin: 0;
+                display: block;
             }
             .receipt-view {
-                padding: 5mm;
-                font-size: 10pt;
+                padding: 2mm;
+                font-size: 9pt;
                 width: 100%;
                 overflow: visible;
                 color: black;
+                line-height: 1.2; /* Menghindari tumpang tindih antar baris */
+            }
+            .thermal-header {
+                margin-bottom: 4mm;
+            }
+            .thermal-header h1 {
+                font-size: 12pt;
+                margin-bottom: 1mm;
+                display: block; /* Memastikan baris baru */
+            }
+            .thermal-header p {
+                font-size: 8pt;
+                margin: 0;
+                display: block;
+                word-wrap: break-word; /* Alamat panjang akan turun ke bawah, tidak menumpuk */
             }
             .dashed-line {
                 border-top: 1px dashed black;
+                margin: 2mm 0;
             }
             .cart-row {
                 border-bottom: none;
+                margin-bottom: 1mm;
+            }
+            .cart-top {
+                font-size: 9pt;
+            }
+            .cart-bottom {
+                font-size: 8pt;
             }
             .total-large {
-                font-size: 12pt;
+                font-size: 11pt;
                 border-top: 1px dashed black;
+                margin-top: 2mm;
+                padding-top: 1mm;
             }
-            h1 { font-size: 14pt; }
+            h1 { font-size: 12pt; }
         }
     </style>
 </head>
@@ -536,9 +562,20 @@
 
     function processPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        let cashInputVal = document.getElementById('cashInput').value.replace(/\./g, '');
-        let cash = parseInt(cashInputVal);
-        if(isNaN(cash) || cash < total) { alert("Uang kurang!"); return; }
+        let cashRaw = document.getElementById('cashInput').value.replace(/\./g, '').replace(/,/g, '');
+        let cash = parseInt(cashRaw);
+
+        // LOGIKA PENYEDERHANAAN INPUT (Sesuai Permintaan)
+        // Jika input 40 -> 40.000, 400 -> 400.000
+        if (!isNaN(cash) && cash > 0 && cash < 1000) {
+            cash = cash * 1000;
+        }
+
+        if(isNaN(cash) || cash < total) { 
+            alert("Uang kurang! Masukkan minimal " + format(total)); 
+            return; 
+        }
+
         document.getElementById('resCash').innerText = format(cash);
         document.getElementById('resChange').innerText = format(cash - total);
         document.getElementById('paymentResult').style.display = 'block';
@@ -571,8 +608,15 @@
     
     function addManual() {
         const n = prompt("Nama Barang:");
-        const p = parseInt(prompt("Harga:"));
-        if(n && p) { masterData.push({name: n.toUpperCase(), price: p}); renderMaster(); localStorage.setItem('master_items', JSON.stringify(masterData)); }
+        const pStr = prompt("Harga:");
+        if (n && pStr) {
+            let p = parseInt(pStr);
+            // Juga terapkan logika k di input barang baru agar cepat
+            if(p < 1000) p = p * 1000;
+            masterData.push({name: n.toUpperCase(), price: p}); 
+            renderMaster(); 
+            localStorage.setItem('master_items', JSON.stringify(masterData)); 
+        }
     }
 
     function renderChart() {
