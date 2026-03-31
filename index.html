@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasir Pro - Struk Rekap Harian</title>
+    <title>Kasir Pro - Grafik Penjualan</title>
+    <!-- Tambahkan Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg: #f8fafc;
@@ -256,7 +258,7 @@
             background: white;
             padding: 30px;
             border-radius: 20px;
-            width: 480px;
+            width: 650px; /* Lebarkan sedikit untuk grafik */
             max-width: 95%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             text-align: center;
@@ -289,6 +291,16 @@
             display: grid;
             gap: 15px;
             text-align: left;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 250px;
+            background: #fff;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 20px;
         }
 
         .report-section {
@@ -325,17 +337,6 @@
             border-bottom: 1px solid #f1f5f9;
             font-size: 11px;
             color: #64748b;
-        }
-
-        .btn-print-rekap {
-            background: var(--dark);
-            color: white;
-            border: none;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            cursor: pointer;
-            margin-left: 10px;
         }
 
         /* PRINT STYLE */
@@ -488,12 +489,17 @@
     </div>
 </div>
 
-<!-- MODAL PENGATURAN & LAPORAN -->
+<!-- MODAL PENGATURAN, GRAFIK & LAPORAN -->
 <div class="modal-overlay" id="settingsModal">
-    <div class="modal-content" style="width: 550px;">
-        <div class="modal-title">PENGATURAN & LAPORAN HARIAN</div>
+    <div class="modal-content">
+        <div class="modal-title">PENJUALAN & PENGATURAN</div>
         
         <div class="settings-grid">
+            <!-- AREA GRAFIK -->
+            <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+            </div>
+
             <div style="display: flex; gap: 10px;">
                 <div class="input-group" style="flex:1">
                     <label>NAMA TOKO</label>
@@ -514,7 +520,7 @@
             <!-- LAPORAN HARIAN -->
             <div class="report-section">
                 <h4 style="font-size: 13px; margin-bottom: 10px; color: var(--dark);">REKAPITULASI PENJUALAN HARIAN</h4>
-                <div id="dailyReportContainer" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+                <div id="dailyReportContainer" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
                 </div>
             </div>
         </div>
@@ -539,6 +545,7 @@
     let transactionHistory = [];
     let currentCalc = "0";
     let currentTrxId = "";
+    let salesChart = null;
 
     function init() {
         const localMaster = localStorage.getItem('master_items');
@@ -559,39 +566,23 @@
         renderMaster();
         renderHistory();
 
-        // KEYBOARD SHORTCUTS FIX
         window.addEventListener('keydown', (e) => {
-            // CEK APAKAH LAGI MENGETIK DI INPUT
             const isTyping = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
-            
             if (isTyping) {
-                // Jika sedang mengetik di input, jangan jalankan shortcut kasir
-                // Kecuali Enter di modal bayar
-                if (e.key === 'Enter' && document.getElementById('payModal').style.display === 'flex') {
-                    processPayment();
-                }
+                if (e.key === 'Enter' && document.getElementById('payModal').style.display === 'flex') processPayment();
                 if (e.key === 'Escape') {
                     closePayModal();
                     if(document.getElementById('settingsModal').style.display === 'flex') toggleSettings();
                 }
                 return; 
             }
-
-            // Global Shortcuts
-            if (e.key === ' ' || e.code === 'Space') {
-                e.preventDefault();
-                openPayModal();
-            } else if (e.key === 'p' || e.key === 'P') {
-                printStruk();
-            } else if (e.key === 'r' || e.key === 'R') {
-                resetTransaction();
-            } else if (e.key === 'Escape') {
-                closePayModal();
-            }
+            if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); openPayModal(); }
+            else if (e.key === 'p' || e.key === 'P') { printStruk(); }
+            else if (e.key === 'r' || e.key === 'R') { resetTransaction(); }
+            else if (e.key === 'Escape') { closePayModal(); }
         });
     }
 
-    // FORMAT RUPIAH
     function format(n) { return Number(n).toLocaleString('id-ID'); }
 
     function newTransaction() {
@@ -612,7 +603,10 @@
         const modal = document.getElementById('settingsModal');
         const isOpen = modal.style.display === 'flex';
         modal.style.display = isOpen ? 'none' : 'flex';
-        if (!isOpen) renderDailyReport();
+        if (!isOpen) {
+            renderDailyReport();
+            renderSalesChart();
+        }
     }
 
     function saveSettings() {
@@ -625,23 +619,16 @@
         toggleSettings();
     }
 
-    // MASTER BARANG FUNCTIONS
     function renderMaster() {
         const query = document.getElementById('searchBar').value.toLowerCase();
         const container = document.getElementById('masterItems');
         container.innerHTML = "";
-        
-        const filtered = masterData.filter(i => i.name.toLowerCase().includes(query))
-                                   .sort((a,b) => a.name.localeCompare(b.name));
-
+        const filtered = masterData.filter(i => i.name.toLowerCase().includes(query)).sort((a,b) => a.name.localeCompare(b.name));
         filtered.forEach((item) => {
             const div = document.createElement('div');
             div.className = "master-item";
-            div.onclick = (e) => { 
-                if (!e.target.closest('.btn-delete-master')) addToCart(item.name, item.price); 
-            };
-            div.innerHTML = `
-                <div class="master-item-info"><b>${item.name}</b><span>Rp ${format(item.price)}</span></div>
+            div.onclick = (e) => { if (!e.target.closest('.btn-delete-master')) addToCart(item.name, item.price); };
+            div.innerHTML = `<div class="master-item-info"><b>${item.name}</b><span>Rp ${format(item.price)}</span></div>
                 <div class="btn-delete-master" onclick="deleteFromMaster('${item.name.replace(/'/g, "\\'")}')">${trashIcon}</div>
                 <div style="color: var(--success); font-size: 18px; margin-left: 10px;">+</div>`;
             container.appendChild(div);
@@ -667,7 +654,6 @@
         }
     }
 
-    // CART FUNCTIONS
     function addToCart(name, price) {
         const idx = cart.findIndex(i => i.name === name);
         if(idx > -1) cart[idx].qty++;
@@ -676,7 +662,6 @@
     }
 
     function removeCart(idx) { cart.splice(idx, 1); renderCart(); }
-    
     function updateQty(idx, delta) {
         cart[idx].qty += delta;
         if(cart[idx].qty <= 0) cart.splice(idx, 1);
@@ -692,23 +677,19 @@
             total += sub; q += item.qty;
             const div = document.createElement('div');
             div.className = "cart-row";
-            div.innerHTML = `
-                <div class="cart-top"><span>${item.name}</span><span>${format(sub)}</span></div>
-                <div class="cart-bottom">
-                    <span class="qty-badge">${item.qty}</span> x ${format(item.price)}
+            div.innerHTML = `<div class="cart-top"><span>${item.name}</span><span>${format(sub)}</span></div>
+                <div class="cart-bottom"><span class="qty-badge">${item.qty}</span> x ${format(item.price)}
                     <div class="no-print" style="margin-left: 10px; display:flex; gap: 5px;">
                         <button onclick="updateQty(${i}, -1)" style="padding:0 5px; cursor:pointer;">-</button>
                         <button onclick="updateQty(${i}, 1)" style="padding:0 5px; cursor:pointer;">+</button>
                     </div>
-                    <span class="btn-remove no-print" onclick="removeCart(${i})">${trashIcon}</span>
-                </div>`;
+                    <span class="btn-remove no-print" onclick="removeCart(${i})">${trashIcon}</span></div>`;
             container.appendChild(div);
         });
         document.getElementById('totalQty').innerText = q;
         document.getElementById('grandTotal').innerText = format(total);
     }
 
-    // PAYMENT
     function openPayModal() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         if(total === 0) return;
@@ -718,9 +699,7 @@
         setTimeout(() => document.getElementById('cashInput').focus(), 100);
     }
 
-    function closePayModal() {
-        document.getElementById('payModal').style.display = 'none';
-    }
+    function closePayModal() { document.getElementById('payModal').style.display = 'none'; }
 
     function processPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
@@ -737,7 +716,8 @@
                 items: JSON.parse(JSON.stringify(cart)),
                 total: total,
                 cash: cash,
-                change: cash - total
+                change: cash - total,
+                timestamp: now.getTime()
             };
             transactionHistory.unshift(trx);
             localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
@@ -751,15 +731,13 @@
 
     function printStruk() { window.print(); }
 
-    // HISTORY
     function renderHistory() {
         const log = document.getElementById('trxHistoryLog');
         log.innerHTML = "";
         transactionHistory.slice(0, 20).forEach((trx, index) => {
             const div = document.createElement('div');
             div.className = "trx-card";
-            div.innerHTML = `
-                <div class="trx-card-header"><span>${trx.id}</span><span>Rp ${format(trx.total)}</span></div>
+            div.innerHTML = `<div class="trx-card-header"><span>${trx.id}</span><span>Rp ${format(trx.total)}</span></div>
                 <div class="trx-card-body">${trx.date} (${trx.items.length} item)</div>
                 <div class="trx-card-footer">
                     <button class="btn-reprint" onclick="reprintTrx(${index})">MUAT & CETAK</button>
@@ -798,12 +776,7 @@
         }
     }
 
-    // CALCULATOR FUNCTIONS
-    function num(v) {
-        if(currentCalc === "0") currentCalc = v;
-        else currentCalc += v;
-        updateCalc();
-    }
+    function num(v) { if(currentCalc === "0") currentCalc = v; else currentCalc += v; updateCalc(); }
     function op(v) { currentCalc += v; updateCalc(); }
     function clearCalc() { currentCalc = "0"; updateCalc(); }
     function backspace() { currentCalc = currentCalc.slice(0, -1) || "0"; updateCalc(); }
@@ -812,18 +785,13 @@
     function addToCartManual() {
         try {
             let res = eval(currentCalc);
-            if(!isNaN(res) && res > 0) {
-                addToCart("ITEM MANUAL", res);
-                clearCalc();
-            }
+            if(!isNaN(res) && res > 0) { addToCart("ITEM MANUAL", res); clearCalc(); }
         } catch(e) { alert("Input tidak valid"); }
     }
 
-    // REKAPITULASI
     function renderDailyReport() {
         const container = document.getElementById('dailyReportContainer');
         container.innerHTML = "";
-        
         const grouped = transactionHistory.reduce((acc, trx) => {
             const key = trx.dateKey || trx.date.split(',')[0];
             if(!acc[key]) acc[key] = { total: 0, count: 0, items: [] };
@@ -832,17 +800,11 @@
             acc[key].items.push(trx);
             return acc;
         }, {});
-
         Object.keys(grouped).sort((a,b) => b.localeCompare(a)).forEach(date => {
             const data = grouped[date];
             const section = document.createElement('div');
             section.className = "date-group";
-            section.innerHTML = `
-                <div class="date-header">
-                    <span>${date} (${data.count} Transaksi)</span>
-                    <span class="date-total">Rp ${format(data.total)}</span>
-                </div>
-            `;
+            section.innerHTML = `<div class="date-header"><span>${date} (${data.count})</span><span class="date-total">Rp ${format(data.total)}</span></div>`;
             data.items.forEach(item => {
                 const row = document.createElement('div');
                 row.className = "report-item";
@@ -853,20 +815,72 @@
         });
     }
 
-    // BACKUP & RESTORE
+    // FUNGSI GRAFIK
+    function renderSalesChart() {
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        
+        // Ambil data 7 hari terakhir
+        const dailySales = {};
+        const labels = [];
+        for(let i=6; i>=0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const key = d.toLocaleDateString('id-ID');
+            dailySales[key] = 0;
+            labels.push(key.split('/')[0] + '/' + key.split('/')[1]); // Format tgl/bln
+        }
+
+        transactionHistory.forEach(trx => {
+            const key = trx.dateKey || trx.date.split(',')[0];
+            if(dailySales.hasOwnProperty(key)) {
+                dailySales[key] += trx.total;
+            }
+        });
+
+        const dataPoints = Object.values(dailySales);
+
+        if(salesChart) salesChart.destroy();
+
+        salesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Omzet Penjualan (7 Hari Terakhir)',
+                    data: dataPoints,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#2563eb'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return 'Rp ' + (value/1000) + 'rb'; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     function exportData() {
-        const data = {
-            master_items: masterData,
-            trx_history: transactionHistory,
-            shop_name: localStorage.getItem('shop_name'),
-            shop_addr: localStorage.getItem('shop_addr')
-        };
+        const data = { master_items: masterData, trx_history: transactionHistory, shop_name: localStorage.getItem('shop_name'), shop_addr: localStorage.getItem('shop_addr') };
         const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = "kasir_backup.json";
-        a.click();
+        a.href = url; a.download = "kasir_backup.json"; a.click();
     }
 
     function triggerRestore() { document.getElementById('restoreFile').click(); }
