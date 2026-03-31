@@ -216,9 +216,9 @@
         }
 
         .history-title { 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
             font-weight: bold; 
             font-size: 11px; 
             margin-bottom: 10px; 
@@ -478,7 +478,7 @@
         
         <div class="input-group">
             <label>NOMINAL TUNAI (Ribu atau Lengkap)</label>
-            <input type="text" class="modal-input" id="cashInput" placeholder="Contoh: 50 atau 50000" autofocus>
+            <input type="text" class="modal-input" id="cashInput" placeholder="Contoh: 50 atau 50000">
         </div>
 
         <div class="modal-footer">
@@ -538,7 +538,6 @@
     let cart = [];
     let transactionHistory = [];
     let currentCalc = "0";
-    let isModalOpen = false;
     let currentTrxId = "";
 
     function init() {
@@ -559,49 +558,40 @@
         newTransaction();
         renderMaster();
         renderHistory();
-    }
 
-    // BACKUP & RESTORE
-    function exportData() {
-        const data = {
-            master_items: masterData,
-            trx_history: transactionHistory,
-            shop_name: localStorage.getItem('shop_name') || "TOKO",
-            shop_addr: localStorage.getItem('shop_addr') || "ALAMAT",
-            export_date: new Date().toISOString()
-        };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `backup_kasir_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    function triggerRestore() { document.getElementById('restoreFile').click(); }
-
-    function handleRestore(input) {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (confirm("Ganti data saat ini dengan data dari backup?")) {
-                    masterData = data.master_items || [];
-                    transactionHistory = data.trx_history || [];
-                    localStorage.setItem('master_items', JSON.stringify(masterData));
-                    localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
-                    localStorage.setItem('shop_name', data.shop_name || "");
-                    localStorage.setItem('shop_addr', data.shop_addr || "");
-                    location.reload();
+        // KEYBOARD SHORTCUTS FIX
+        window.addEventListener('keydown', (e) => {
+            // CEK APAKAH LAGI MENGETIK DI INPUT
+            const isTyping = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
+            
+            if (isTyping) {
+                // Jika sedang mengetik di input, jangan jalankan shortcut kasir
+                // Kecuali Enter di modal bayar
+                if (e.key === 'Enter' && document.getElementById('payModal').style.display === 'flex') {
+                    processPayment();
                 }
-            } catch (err) { alert("File backup tidak valid."); }
-        };
-        reader.readAsText(file);
+                if (e.key === 'Escape') {
+                    closePayModal();
+                    if(document.getElementById('settingsModal').style.display === 'flex') toggleSettings();
+                }
+                return; 
+            }
+
+            // Global Shortcuts
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+                openPayModal();
+            } else if (e.key === 'p' || e.key === 'P') {
+                printStruk();
+            } else if (e.key === 'r' || e.key === 'R') {
+                resetTransaction();
+            } else if (e.key === 'Escape') {
+                closePayModal();
+            }
+        });
     }
 
+    // FORMAT RUPIAH
     function format(n) { return Number(n).toLocaleString('id-ID'); }
 
     function newTransaction() {
@@ -622,7 +612,6 @@
         const modal = document.getElementById('settingsModal');
         const isOpen = modal.style.display === 'flex';
         modal.style.display = isOpen ? 'none' : 'flex';
-        isModalOpen = !isOpen;
         if (!isOpen) renderDailyReport();
     }
 
@@ -642,7 +631,6 @@
         const container = document.getElementById('masterItems');
         container.innerHTML = "";
         
-        // Filter master data
         const filtered = masterData.filter(i => i.name.toLowerCase().includes(query))
                                    .sort((a,b) => a.name.localeCompare(b.name));
 
@@ -673,13 +661,13 @@
 
     function deleteFromMaster(name) {
         if(confirm(`Hapus "${name}" dari master?`)) {
-            // Hapus berdasarkan nama agar tidak salah index saat sedang di-filter
             masterData = masterData.filter(item => item.name !== name);
             localStorage.setItem('master_items', JSON.stringify(masterData));
             renderMaster();
         }
     }
 
+    // CART FUNCTIONS
     function addToCart(name, price) {
         const idx = cart.findIndex(i => i.name === name);
         if(idx > -1) cart[idx].qty++;
@@ -720,19 +708,18 @@
         document.getElementById('grandTotal').innerText = format(total);
     }
 
+    // PAYMENT
     function openPayModal() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
         if(total === 0) return;
         document.getElementById('modalTotalLabel').innerText = "Rp " + format(total);
         document.getElementById('payModal').style.display = 'flex';
         document.getElementById('cashInput').value = "";
-        document.getElementById('cashInput').focus();
-        isModalOpen = true;
+        setTimeout(() => document.getElementById('cashInput').focus(), 100);
     }
 
     function closePayModal() {
         document.getElementById('payModal').style.display = 'none';
-        isModalOpen = false;
     }
 
     function processPayment() {
@@ -762,6 +749,9 @@
         } else { alert("Uang tunai kurang!"); }
     }
 
+    function printStruk() { window.print(); }
+
+    // HISTORY
     function renderHistory() {
         const log = document.getElementById('trxHistoryLog');
         log.innerHTML = "";
@@ -801,77 +791,98 @@
     }
 
     function clearAllHistory() {
-        if(confirm("Hapus seluruh riwayat transaksi?")) {
+        if(confirm("Hapus SELURUH riwayat transaksi?")) {
             transactionHistory = [];
-            localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
+            localStorage.setItem('trx_history', "[]");
             renderHistory();
         }
     }
 
-    function renderDailyReport() {
-        const container = document.getElementById('dailyReportContainer');
-        container.innerHTML = "";
-        const grouped = {};
-        transactionHistory.forEach(trx => {
-            const key = trx.dateKey || trx.date.split(' ')[0];
-            if (!grouped[key]) grouped[key] = { list: [], total: 0 };
-            grouped[key].list.push(trx);
-            grouped[key].total += trx.total;
-        });
-        const sortedKeys = Object.keys(grouped).sort((a,b) => b.localeCompare(a));
-        if (sortedKeys.length === 0) {
-            container.innerHTML = "<p style='text-align:center; padding:20px; color:#94a3b8;'>Belum ada transaksi</p>";
-            return;
-        }
-        sortedKeys.forEach(key => {
-            const div = document.createElement('div');
-            div.className = "date-group";
-            div.innerHTML = `
-                <div class="date-header"><span>${key}</span><span class="date-total">Rp ${format(grouped[key].total)}</span></div>
-                ${grouped[key].list.map(t => `<div class="report-item"><span>${t.id}</span><span>${format(t.total)}</span></div>`).join('')}
-            `;
-            container.appendChild(div);
-        });
-    }
-
     // CALCULATOR FUNCTIONS
-    function num(v) { 
-        if(currentCalc === "0") currentCalc = v; else currentCalc += v;
+    function num(v) {
+        if(currentCalc === "0") currentCalc = v;
+        else currentCalc += v;
         updateCalc();
     }
-    function op(o) { currentCalc += " " + o + " "; updateCalc(); }
+    function op(v) { currentCalc += v; updateCalc(); }
     function clearCalc() { currentCalc = "0"; updateCalc(); }
-    function backspace() { 
-        currentCalc = currentCalc.trim();
-        currentCalc = currentCalc.slice(0, -1) || "0"; 
-        updateCalc(); 
-    }
+    function backspace() { currentCalc = currentCalc.slice(0, -1) || "0"; updateCalc(); }
     function updateCalc() { document.getElementById('calcDisplay').innerText = currentCalc; }
     
     function addToCartManual() {
         try {
-            const price = eval(currentCalc.replace(/[^-()\d/*+.]/g, ''));
-            if(price > 0) {
-                addToCart("ITEM MANUAL", price);
+            let res = eval(currentCalc);
+            if(!isNaN(res) && res > 0) {
+                addToCart("ITEM MANUAL", res);
                 clearCalc();
             }
-        } catch(e) { alert("Format kalkulator salah"); }
+        } catch(e) { alert("Input tidak valid"); }
     }
 
-    function printStruk() { window.print(); }
+    // REKAPITULASI
+    function renderDailyReport() {
+        const container = document.getElementById('dailyReportContainer');
+        container.innerHTML = "";
+        
+        const grouped = transactionHistory.reduce((acc, trx) => {
+            const key = trx.dateKey || trx.date.split(',')[0];
+            if(!acc[key]) acc[key] = { total: 0, count: 0, items: [] };
+            acc[key].total += trx.total;
+            acc[key].count += 1;
+            acc[key].items.push(trx);
+            return acc;
+        }, {});
 
-    // KEYBOARD SHORTCUTS
-    window.addEventListener('keydown', (e) => {
-        if(isModalOpen) {
-            if(e.key === "Escape") closePayModal();
-            if(e.key === "Enter") processPayment();
-            return;
-        }
-        if(e.key === " " || e.code === "Space") { e.preventDefault(); openPayModal(); }
-        if(e.key === "p" || e.key === "P") printStruk();
-        if(e.key === "r" || e.key === "R") resetTransaction();
-    });
+        Object.keys(grouped).sort((a,b) => b.localeCompare(a)).forEach(date => {
+            const data = grouped[date];
+            const section = document.createElement('div');
+            section.className = "date-group";
+            section.innerHTML = `
+                <div class="date-header">
+                    <span>${date} (${data.count} Transaksi)</span>
+                    <span class="date-total">Rp ${format(data.total)}</span>
+                </div>
+            `;
+            data.items.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "report-item";
+                row.innerHTML = `<span>${item.id}</span><span>Rp ${format(item.total)}</span>`;
+                section.appendChild(row);
+            });
+            container.appendChild(section);
+        });
+    }
+
+    // BACKUP & RESTORE
+    function exportData() {
+        const data = {
+            master_items: masterData,
+            trx_history: transactionHistory,
+            shop_name: localStorage.getItem('shop_name'),
+            shop_addr: localStorage.getItem('shop_addr')
+        };
+        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "kasir_backup.json";
+        a.click();
+    }
+
+    function triggerRestore() { document.getElementById('restoreFile').click(); }
+    function handleRestore(input) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = JSON.parse(e.target.result);
+            masterData = data.master_items;
+            transactionHistory = data.trx_history;
+            localStorage.setItem('master_items', JSON.stringify(masterData));
+            localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
+            location.reload();
+        };
+        reader.readAsText(file);
+    }
 </script>
-
 </body>
 </html>
