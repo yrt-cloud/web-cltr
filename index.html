@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasir Pro - Navigasi Keyboard</title>
+    <title>Kasir Pro - Fitur Lengkap</title>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -16,9 +16,7 @@
             --border: #e2e8f0;
             --overlay: rgba(0, 0, 0, 0.5);
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
             background-color: var(--bg);
             font-family: 'Inter', system-ui, sans-serif;
@@ -28,7 +26,6 @@
             align-items: center;
             overflow: hidden;
         }
-
         .app-container {
             display: flex;
             background: #fff;
@@ -41,7 +38,6 @@
             gap: 15px;
             position: relative;
         }
-
         /* MASTER BARANG */
         .master-section {
             flex: 1;
@@ -51,19 +47,16 @@
             padding-right: 15px;
             min-width: 280px;
         }
-
         .master-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-
         .search-container {
             position: relative;
             margin-bottom: 10px;
         }
-
         .search-input {
             width: 100%;
             padding: 12px 15px;
@@ -73,19 +66,10 @@
             transition: 0.3s;
             font-weight: 600;
         }
-
         .search-input:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
-
-        .search-hint {
-            font-size: 10px;
-            color: #94a3b8;
-            margin-top: 4px;
-            margin-bottom: 10px;
-        }
-
         .master-list {
             flex-grow: 1;
             overflow-y: auto;
@@ -94,7 +78,6 @@
             gap: 8px;
             padding-right: 5px;
         }
-
         .master-item {
             display: flex;
             justify-content: space-between;
@@ -105,38 +88,18 @@
             border-radius: 10px;
             cursor: pointer;
             transition: 0.2s;
-            position: relative;
         }
-
-        /* Highlight warna hijau saat dipilih via keyboard atau hover */
         .master-item:hover, .master-item.selected {
             border: 2px solid var(--success);
             background: #f0fdf4;
             transform: translateX(5px);
         }
-
-        .master-item-info b { font-size: 13px; text-transform: uppercase; display: block; margin-right: 60px; }
+        .master-item-info b { font-size: 13px; text-transform: uppercase; display: block; }
         .master-item-info span { font-size: 12px; color: var(--accent); font-weight: 600; }
-
-        .btn-delete-master {
-            position: absolute;
-            right: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            color: #94a3b8;
-            transition: color 0.2s;
-            z-index: 2;
-        }
-
-        .btn-delete-master:hover { color: var(--danger); }
-        .btn-delete-master svg { width: 18px; height: 18px; fill: currentColor; }
-
-        /* STRUK AREA (CENTER) */
+        
+        /* STRUK AREA */
         .receipt-section {
-            flex: 0 0 320px;
+            flex: 0 0 350px;
             display: flex;
             flex-direction: column;
             background: #fff;
@@ -145,7 +108,6 @@
             overflow: hidden;
             position: relative;
         }
-
         .receipt-view {
             flex-grow: 1;
             padding: 20px;
@@ -153,38 +115,28 @@
             font-family: 'Courier New', Courier, monospace;
             font-size: 12px;
             line-height: 1.4;
-            background: #ffffff;
         }
-
         .thermal-header { text-align: center; margin-bottom: 10px; position: relative; }
-        .thermal-header h1 { font-size: 14px; text-transform: uppercase; margin-bottom: 2px; }
-        .thermal-header p { font-size: 10px; color: #333; }
-
-        .btn-settings {
+        .btn-settings-trigger {
             position: absolute;
-            top: -10px;
-            right: -10px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #94a3b8;
-            padding: 5px;
+            top: -10px; right: -10px;
+            background: none; border: none; cursor: pointer; color: #94a3b8; padding: 5px;
         }
-        .btn-settings svg { width: 16px; height: 16px; fill: currentColor; }
-        .btn-settings:hover { color: var(--accent); }
-
+        .btn-settings-trigger:hover { color: var(--accent); }
         .dashed-line { border-top: 1px dashed #bbb; margin: 10px 0; }
-
-        .cart-row { margin-bottom: 10px; }
+        
+        /* CART */
+        .cart-row { margin-bottom: 12px; padding-bottom: 5px; border-bottom: 1px solid #f1f5f9; }
         .cart-top { display: flex; justify-content: space-between; font-weight: bold; }
-        .cart-bottom { font-size: 11px; color: #444; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
-
-        .qty-badge { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 4px; font-size: 10px; color: #000; }
+        .cart-bottom { font-size: 11px; color: #444; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .qty-input-wrapper { display: flex; align-items: center; background: #f1f5f9; border-radius: 6px; padding: 2px; border: 1px solid #e2e8f0; }
+        .qty-input-wrapper input { width: 40px; border: none; background: transparent; text-align: center; font-weight: bold; outline: none; }
+        .qty-input-wrapper button { border: none; background: white; width: 20px; height: 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
         .total-large { font-size: 18px; font-weight: 900; margin-top: 8px; color: #000; }
 
-        /* CALCULATOR & HISTORY */
+        /* CALCULATOR */
         .calc-section {
             flex: 0 0 350px;
             display: flex;
@@ -193,187 +145,50 @@
             border-left: 1px solid var(--border);
             padding-left: 15px;
         }
-
         .calc-display {
-            background: var(--dark);
-            color: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: right;
-            font-size: 24px;
-            font-family: monospace;
-            min-height: 60px;
+            background: var(--dark); color: #fff; padding: 15px; border-radius: 12px;
+            text-align: right; font-size: 24px; font-family: monospace; min-height: 60px;
         }
-
-        .calc-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
-
-        .btn {
-            padding: 12px 5px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-            background: #e2e8f0;
-            transition: opacity 0.2s;
-        }
-        .btn:active { opacity: 0.7; }
-
-        .btn-op { background: #f59e0b; color: white; }
-        .btn-num { background: #fff; border: 1px solid var(--border); }
-
-        .history-panel {
-            flex-grow: 1;
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 10px;
-            overflow-y: auto;
-            font-family: sans-serif;
-            border: 1px solid var(--border);
-        }
-
-        .history-title { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            font-weight: bold; 
-            font-size: 11px; 
-            margin-bottom: 10px; 
-            color: #64748b; 
-            text-transform: uppercase; 
-        }
-
-        .trx-card {
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 8px;
-            font-size: 11px;
-        }
-
-        .trx-card-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; color: var(--dark); }
-        .trx-card-body { color: #64748b; margin-bottom: 8px; }
-        .trx-card-footer { display: flex; justify-content: space-between; align-items: center; }
-        .btn-reprint { background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .btn { padding: 12px 5px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; background: #e2e8f0; }
 
         /* MODAL SYSTEM */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--overlay);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--overlay); display: none; justify-content: center; align-items: center;
+            z-index: 1000; backdrop-filter: blur(4px);
         }
-
         .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            width: 650px;
-            max-width: 95%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            text-align: center;
-            max-height: 90vh;
-            overflow-y: auto;
+            background: white; padding: 25px; border-radius: 20px; width: 500px;
+            max-width: 95%; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
         }
-
-        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 15px; color: var(--dark); }
-        .modal-total { font-size: 32px; font-weight: 900; color: var(--accent); margin-bottom: 20px; }
-        
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 15px; color: var(--dark); text-align: center; }
         .input-group { text-align: left; margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 5px; }
-        .modal-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 20px;
-            font-weight: bold;
-            outline: none;
-            text-align: center;
-        }
-        .modal-input:focus { border-color: var(--accent); }
-
-        .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-modal { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-
-        /* CHART & REPORTS */
-        .chart-container {
-            width: 100%;
-            height: 220px;
-            background: #fff;
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 15px;
-        }
-
-        .report-section {
-            margin-top: 15px;
-            text-align: left;
-            border-top: 2px solid var(--border);
-            padding-top: 15px;
-        }
-
-        /* BACKUP SECTION */
-        .backup-section {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f1f5f9;
-            border-radius: 12px;
-            text-align: left;
-        }
-        .backup-buttons { display: flex; gap: 10px; margin-top: 10px; }
-
-        .save-indicator {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            font-size: 10px;
-            color: var(--success);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            opacity: 0.7;
-        }
+        .input-group label { display: block; font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 5px; }
+        .modal-input { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 10px; outline: none; }
+        
+        .btn-remove { color: var(--danger); cursor: pointer; margin-left: auto; }
+        .btn-remove svg { width: 16px; height: 16px; fill: currentColor; }
 
         @media print {
-            .no-print, .calc-section, .master-section, .btn-remove, .qty-badge button, .btn-settings, .save-indicator { display: none !important; }
-            body, .app-container { background: white; padding: 0; margin: 0; display: block; height: auto; width: 100%; box-shadow: none; }
-            .receipt-section { border: none; width: 100%; max-width: 80mm; margin: 0 auto; box-shadow: none; }
-            .receipt-view { background: white; overflow: visible; font-size: 10pt; padding: 0; }
+            .no-print { display: none !important; }
+            body, .app-container { background: white; display: block; }
+            .receipt-section { border: none; width: 100%; }
         }
-
-        .btn-remove { color: var(--danger); cursor: pointer; margin-left: auto; display: flex; align-items: center; }
-        .btn-remove svg { width: 14px; height: 14px; fill: currentColor; }
     </style>
 </head>
 <body onload="init()">
-
-<div class="save-indicator no-print">
-    <div style="width: 6px; height: 6px; background: var(--success); border-radius: 50%;"></div>
-    Autosave Aktif
-</div>
 
 <div class="app-container">
     <!-- MASTER BARANG -->
     <div class="master-section no-print">
         <div class="master-header">
-            <h3>MASTER BARANG</h3>
+            <h3>DATA BARANG</h3>
             <button class="btn" style="background: var(--success); color:white; padding: 5px 12px;" onclick="addManual()">+ BARANG</button>
         </div>
         <div class="search-container">
-            <input type="text" class="search-input" id="searchBar" placeholder="Cari / Scan barang..." oninput="renderMaster(true)" onkeydown="handleSearchKey(event)">
+            <input type="text" class="search-input" id="searchBar" placeholder="Cari barang..." oninput="renderMaster(true)">
         </div>
-        <p class="search-hint">Gunakan Panah <b>↑↓</b> dan <b>Enter</b> untuk pilih cepat.</p>
         <div class="master-list" id="masterItems"></div>
     </div>
 
@@ -381,8 +196,8 @@
     <div class="receipt-section">
         <div class="receipt-view" id="printArea">
             <div class="thermal-header">
-                <button class="btn-settings no-print" onclick="toggleSettings()" title="Pengaturan & Laporan">
-                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                <button class="btn-settings-trigger no-print" onclick="toggleSettings()" title="Pengaturan">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 </button>
                 <h1 id="shopNameDisplay">NAMA TOKO</h1>
                 <p id="shopAddrDisplay">Alamat Toko</p>
@@ -393,21 +208,12 @@
                 </div>
                 <div class="dashed-line"></div>
             </div>
-
             <div id="cartContent"></div>
-
             <div id="summaryArea">
                 <div class="dashed-line"></div>
-                <div class="summary-row">
-                    <span>ITEM TOTAL</span>
-                    <span id="totalQty">0</span>
-                </div>
-                <div class="summary-row total-large">
-                    <span>TOTAL</span>
-                    <span id="grandTotal">0</span>
-                </div>
+                <div class="summary-row"><span>ITEM TOTAL</span> <span id="totalQty">0</span></div>
+                <div class="summary-row total-large"><span>TOTAL</span> <span id="grandTotal">0</span></div>
             </div>
-
             <div id="paymentResult" style="display:none; margin-top: 15px;">
                 <div class="summary-row"><span>TUNAI</span> <span id="resCash">0</span></div>
                 <div class="summary-row"><span>KEMBALI</span> <span id="resChange">0</span></div>
@@ -415,52 +221,58 @@
                 <p style="text-align: center; font-size: 10px; margin-top: 15px; font-weight: bold;">TERIMA KASIH</p>
             </div>
         </div>
-
         <div class="no-print" style="padding: 10px; display: grid; gap: 8px; border-top: 1px solid var(--border);">
             <div style="display: flex; gap: 5px;">
                 <button class="btn" style="flex:1; background: var(--danger); color:white;" onclick="resetTransaction()">RESET (R)</button>
                 <button class="btn" style="flex:1; background: var(--accent); color:white;" onclick="openPayModal()">BAYAR (SPACE)</button>
             </div>
-            <button class="btn" style="width:100%; background: var(--dark); color:white;" onclick="printStruk()">CETAK STRUK (P)</button>
+            <button class="btn" style="width:100%; background: var(--dark); color:white;" onclick="printStruk()">CETAK (P)</button>
         </div>
     </div>
 
-    <!-- CALCULATOR & RIWAYAT -->
+    <!-- CALCULATOR -->
     <div class="calc-section no-print">
         <div class="calc-display" id="calcDisplay">0</div>
         <div class="calc-grid">
-            <button class="btn btn-op" onclick="clearCalc()">C</button>
-            <button class="btn btn-op" onclick="backspace()">DEL</button>
-            <button class="btn btn-op" onclick="op('/')">÷</button>
-            <button class="btn btn-op" onclick="op('*')">×</button>
-            
-            <button class="btn btn-num" onclick="num('7')">7</button>
-            <button class="btn btn-num" onclick="num('8')">8</button>
-            <button class="btn btn-num" onclick="num('9')">9</button>
-            <button class="btn btn-op" onclick="op('-')">−</button>
-            
-            <button class="btn btn-num" onclick="num('4')">4</button>
-            <button class="btn btn-num" onclick="num('5')">5</button>
-            <button class="btn btn-num" onclick="num('6')">6</button>
-            <button class="btn btn-op" onclick="op('+')">+</button>
-            
-            <button class="btn btn-num" onclick="num('1')">1</button>
-            <button class="btn btn-num" onclick="num('2')">2</button>
-            <button class="btn btn-num" onclick="num('3')">3</button>
-            <button class="btn btn-op" style="background:#3b82f6" onclick="addToCartManual()">OK</button>
-            
-            <button class="btn btn-num" onclick="num('0')">0</button>
-            <button class="btn btn-num" onclick="num('00')">00</button>
-            <button class="btn btn-num" onclick="num('000')">000</button>
-            <button class="btn btn-num" onclick="num('.')">.</button>
+            <button class="btn" onclick="clearCalc()">C</button>
+            <button class="btn" onclick="backspace()">DEL</button>
+            <button class="btn" onclick="num('7')">7</button><button class="btn" onclick="num('8')">8</button><button class="btn" onclick="num('9')">9</button>
+            <button class="btn" onclick="num('4')">4</button><button class="btn" onclick="num('5')">5</button><button class="btn" onclick="num('6')">6</button>
+            <button class="btn" onclick="num('1')">1</button><button class="btn" onclick="num('2')">2</button><button class="btn" onclick="num('3')">3</button>
+            <button class="btn" onclick="num('0')">0</button><button class="btn" onclick="num('000')">.000</button>
+            <button class="btn" style="background:var(--accent); color:white; grid-column: span 2;" onclick="addToCartManual()">TAMBAH HARGA</button>
+        </div>
+        <div style="margin-top:10px; font-size:11px; font-weight:bold; color:#64748b">TRANSAKSI TERBARU</div>
+        <div class="history-panel" id="trxHistoryLog"></div>
+    </div>
+</div>
+
+<!-- MODAL PENGATURAN -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+        <div class="modal-title">PENGATURAN TOKO & LAPORAN</div>
+        
+        <div class="input-group">
+            <label>NAMA TOKO</label>
+            <input type="text" class="modal-input" id="setShopName">
+        </div>
+        <div class="input-group">
+            <label>ALAMAT TOKO</label>
+            <input type="text" class="modal-input" id="setShopAddr">
         </div>
 
-        <div class="history-panel">
-            <div class="history-title">
-                Riwayat Cepat
-                <span style="color:var(--danger); cursor:pointer; font-size:9px;" onclick="clearAllHistory()">Hapus Semua</span>
-            </div>
-            <div id="trxHistoryLog"></div>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn" style="flex:1; background:var(--dark); color:white; font-size:12px" onclick="exportData()">DOWNLOAD BACKUP</button>
+            <button class="btn" style="flex:1; background:var(--accent); color:white; font-size:12px" onclick="document.getElementById('importFile').click()">RESTORE DATA</button>
+            <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+        </div>
+
+        <div style="font-weight:bold; font-size:12px; margin-bottom:10px; color:var(--dark)">RINGKASAN PENJUALAN</div>
+        <canvas id="salesChart" width="400" height="200" style="margin-bottom:20px"></canvas>
+
+        <div style="display: flex; gap: 10px;">
+            <button class="btn" style="flex:1" onclick="toggleSettings()">BATAL</button>
+            <button class="btn" style="flex:1; background:var(--success); color:white;" onclick="saveSettings()">SIMPAN PERUBAHAN</button>
         </div>
     </div>
 </div>
@@ -468,194 +280,141 @@
 <!-- MODAL BAYAR -->
 <div class="modal-overlay" id="payModal">
     <div class="modal-content">
-        <div class="modal-title">TOTAL PEMBAYARAN</div>
-        <div class="modal-total" id="modalTotalLabel">Rp 0</div>
+        <div class="modal-title">PEMBAYARAN</div>
+        <div style="font-size: 32px; font-weight: 900; color: var(--accent); margin-bottom: 20px; text-align:center" id="modalTotalLabel">Rp 0</div>
         <div class="input-group">
-            <label>NOMINAL TUNAI (Ribu atau Lengkap)</label>
-            <input type="text" class="modal-input" id="cashInput" placeholder="Contoh: 50 atau 50000">
+            <label>UANG TUNAI</label>
+            <input type="text" class="modal-input" id="cashInput" placeholder="Masukkan jumlah uang..." style="font-size:24px; text-align:center">
         </div>
-        <div class="modal-footer">
-            <button class="btn-modal" style="background: #f1f5f9; color: #64748b;" onclick="closePayModal()">BATAL (ESC)</button>
-            <button class="btn-modal" style="background: var(--accent); color: white;" onclick="processPayment()">PROSES (ENTER)</button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL PENGATURAN -->
-<div class="modal-overlay" id="settingsModal">
-    <div class="modal-content">
-        <div class="modal-title">PENGATURAN & LAPORAN</div>
-        
-        <div class="chart-container">
-            <canvas id="salesChart"></canvas>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <div class="input-group" style="flex:1">
-                <label>NAMA TOKO</label>
-                <input type="text" class="modal-input" id="settingShopName" style="font-size: 14px; text-align: left; padding: 10px;">
-            </div>
-            <div class="input-group" style="flex:1">
-                <label>ALAMAT TOKO</label>
-                <input type="text" class="modal-input" id="settingShopAddr" style="font-size: 14px; text-align: left; padding: 10px;">
-            </div>
-        </div>
-
-        <!-- FITUR BACKUP RESTORE -->
-        <div class="backup-section">
-            <label style="font-size: 12px; font-weight: bold; color: var(--dark);">BACKUP & RESTORE DATA</label>
-            <p style="font-size: 10px; color: #64748b; margin-top: 2px;">Amankan data master barang dan riwayat transaksi Anda.</p>
-            <div class="backup-buttons">
-                <button class="btn" style="background: var(--dark); color: white; flex: 1; font-size: 11px;" onclick="exportData()">DOWNLOAD BACKUP</button>
-                <button class="btn" style="background: var(--accent); color: white; flex: 1; font-size: 11px;" onclick="document.getElementById('importFile').click()">RESTORE DATA</button>
-                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
-            </div>
-        </div>
-
-        <div class="report-section">
-            <h4 style="font-size: 11px; margin-bottom: 5px; color: var(--dark);">REKAP PENJUALAN HARIAN</h4>
-            <div id="dailyReportContainer" style="max-height: 120px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 8px;">
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <button class="btn-modal" style="background: #f1f5f9; color: #64748b;" onclick="toggleSettings()">TUTUP</button>
-            <button class="btn-modal" style="background: var(--success); color: white;" onclick="saveSettings()">SIMPAN</button>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn" style="flex:1" onclick="closePayModal()">BATAL (ESC)</button>
+            <button class="btn" style="flex:1; background: var(--accent); color: white;" onclick="processPayment()">PROSES (ENTER)</button>
         </div>
     </div>
 </div>
 
 <script>
-    const trashIcon = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
-
     let masterData = [
         { name: "BERAS PREMIUM 5KG", price: 75000 },
         { name: "GULA PASIR 1KG", price: 16500 },
-        { name: "KOPI BUBUK 165G", price: 12500 }
+        { name: "MINYAK GORENG 2L", price: 34000 }
     ];
-
     let cart = [];
     let transactionHistory = [];
     let currentCalc = "0";
-    let currentTrxId = "";
-    let salesChart = null;
+    let selectedIdx = 0;
     let filteredMaster = [];
-    let selectedIdx = 0; // Index barang yang terpilih di list
+    let myChart = null;
+
+    const trashIcon = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
 
     function init() {
-        loadFromLocal();
+        loadSettings();
         newTransaction();
         renderMaster();
         renderHistory();
-
+        
         window.addEventListener('keydown', (e) => {
             const isTyping = document.activeElement.tagName === 'INPUT';
-            const searchInput = document.getElementById('searchBar');
-            
-            if (e.key === '/' && !isTyping) { 
-                e.preventDefault(); 
-                searchInput.focus(); 
-            }
-
-            if (isTyping && document.activeElement === searchInput) {
-                // Navigasi Keyboard di List Barang
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    if (selectedIdx < filteredMaster.length - 1) {
-                        selectedIdx++;
-                        renderMaster(false);
-                    }
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    if (selectedIdx > 0) {
-                        selectedIdx--;
-                        renderMaster(false);
-                    }
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (filteredMaster.length > 0) {
-                        const item = filteredMaster[selectedIdx];
-                        addToCart(item.name, item.price);
-                        searchInput.value = "";
-                        renderMaster(true);
+            if (isTyping && document.activeElement.id === 'searchBar') {
+                if (e.key === 'ArrowDown') { e.preventDefault(); selectedIdx = Math.min(selectedIdx + 1, filteredMaster.length - 1); renderMaster(false); }
+                if (e.key === 'ArrowUp') { e.preventDefault(); selectedIdx = Math.max(selectedIdx - 1, 0); renderMaster(false); }
+                if (e.key === 'Enter') { 
+                    if(filteredMaster[selectedIdx]) {
+                        addToCart(filteredMaster[selectedIdx].name, filteredMaster[selectedIdx].price); 
+                        document.getElementById('searchBar').value = ""; renderMaster(); 
                     }
                 }
-                return;
             }
-
-            if (isTyping) {
-                if (e.key === 'Enter' && document.getElementById('payModal').style.display === 'flex') processPayment();
-                if (e.key === 'Escape') { 
-                    closePayModal(); 
-                    if(document.getElementById('settingsModal').style.display === 'flex') toggleSettings(); 
-                }
-                return; 
+            if (!isTyping) {
+                if (e.key === ' ') { e.preventDefault(); openPayModal(); }
+                if (e.key.toLowerCase() === 'r') resetTransaction();
+                if (e.key.toLowerCase() === 'p') printStruk();
             }
-
-            // Global Shortcuts
-            if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); openPayModal(); }
-            else if (e.key === 'p' || e.key === 'P') { printStruk(); }
-            else if (e.key === 'r' || e.key === 'R') { resetTransaction(); }
-            else if (e.key === 'Escape') { closePayModal(); }
+            if (e.key === 'Escape') { closePayModal(); if(document.getElementById('settingsModal').style.display==='flex') toggleSettings(); }
+            if (e.key === 'Enter' && document.getElementById('payModal').style.display==='flex') processPayment();
         });
     }
 
-    function loadFromLocal() {
+    /* SETTINGS LOGIC */
+    function loadSettings() {
         const m = localStorage.getItem('master_items');
         if(m) masterData = JSON.parse(m);
         const h = localStorage.getItem('trx_history');
         if(h) transactionHistory = JSON.parse(h);
+        
         const name = localStorage.getItem('shop_name') || "TOKO KITA";
-        const addr = localStorage.getItem('shop_addr') || "Alamat Toko Anda";
+        const addr = localStorage.getItem('shop_addr') || "Jl. Sudirman No. 123";
+        
         document.getElementById('shopNameDisplay').innerText = name;
         document.getElementById('shopAddrDisplay').innerText = addr;
-        document.getElementById('settingShopName').value = name;
-        document.getElementById('settingShopAddr').value = addr;
+        document.getElementById('setShopName').value = name;
+        document.getElementById('setShopAddr').value = addr;
     }
 
+    function toggleSettings() {
+        const modal = document.getElementById('settingsModal');
+        const isOpen = modal.style.display === 'flex';
+        modal.style.display = isOpen ? 'none' : 'flex';
+        if(!isOpen) renderChart();
+    }
+
+    function saveSettings() {
+        const name = document.getElementById('setShopName').value;
+        const addr = document.getElementById('setShopAddr').value;
+        localStorage.setItem('shop_name', name);
+        localStorage.setItem('shop_addr', addr);
+        loadSettings();
+        toggleSettings();
+    }
+
+    function exportData() {
+        const data = { master: masterData, history: transactionHistory, shop: { name: localStorage.getItem('shop_name'), addr: localStorage.getItem('shop_addr') } };
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup_kasir_${Date.now()}.json`;
+        a.click();
+    }
+
+    function importData(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                if(data.master) {
+                    masterData = data.master;
+                    localStorage.setItem('master_items', JSON.stringify(masterData));
+                }
+                if(data.history) {
+                    transactionHistory = data.history;
+                    localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
+                }
+                alert("Data berhasil dipulihkan!");
+                location.reload();
+            } catch(err) { alert("Format file tidak valid."); }
+        };
+        reader.readAsText(file);
+    }
+
+    /* CART & MASTER LOGIC */
     function format(n) { return Number(n).toLocaleString('id-ID'); }
 
-    // renderMaster diperbarui untuk handle selection
-    function renderMaster(resetSelection = true) {
-        if(resetSelection) selectedIdx = 0;
-        
-        const query = document.getElementById('searchBar').value.toLowerCase();
+    function renderMaster(resetIdx = true) {
+        if(resetIdx) selectedIdx = 0;
+        const q = document.getElementById('searchBar').value.toLowerCase();
+        filteredMaster = masterData.filter(i => i.name.toLowerCase().includes(q));
         const container = document.getElementById('masterItems');
-        container.innerHTML = "";
-        
-        filteredMaster = masterData
-            .filter(i => i.name.toLowerCase().includes(query))
-            .sort((a,b) => a.name.localeCompare(b.name));
-
-        filteredMaster.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = "master-item" + (index === selectedIdx ? " selected" : "");
-            
-            div.onclick = (e) => { 
-                if (!e.target.closest('.btn-delete-master')) {
-                    addToCart(item.name, item.price); 
-                }
-            };
-
-            div.innerHTML = `
-                <div class="master-item-info">
-                    <b>${item.name}</b>
-                    <span>Rp ${format(item.price)}</span>
-                </div>
-                <div class="btn-delete-master" onclick="deleteFromMaster('${item.name.replace(/'/g, "\\'")}')">${trashIcon}</div>
-                <div style="color: var(--success); font-size: 18px; margin-left: 10px; font-weight:bold;">+</div>
-            `;
-            container.appendChild(div);
-
-            // Auto scroll ke item yang terpilih
-            if (index === selectedIdx) {
-                div.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            }
-        });
+        container.innerHTML = filteredMaster.map((item, i) => `
+            <div class="master-item ${i === selectedIdx ? 'selected' : ''}" onclick="addToCart('${item.name}', ${item.price})">
+                <div class="master-item-info"><b>${item.name}</b><span>Rp ${format(item.price)}</span></div>
+                <div style="font-weight:bold; color:var(--success)">+</div>
+            </div>
+        `).join('');
     }
-
-    // Handle search key dihapus karena sudah dihandle di listener global (lebih stabil)
-    function handleSearchKey(e) {}
 
     function addToCart(name, price) {
         const idx = cart.findIndex(i => i.name === name);
@@ -664,37 +423,58 @@
         renderCart();
     }
 
-    function renderCart() {
-        const container = document.getElementById('cartContent');
-        container.innerHTML = "";
+    function setQty(i, val) {
+        let n = parseInt(val);
+        if (isNaN(n) || n < 0) n = 0;
+        cart[i].qty = n;
+        updateTotalsOnly();
+    }
+
+    function updateTotalsOnly() {
         let total = 0, q = 0;
         cart.forEach((item, i) => {
-            const sub = item.price * item.qty;
-            total += sub; q += item.qty;
-            const div = document.createElement('div');
-            div.className = "cart-row";
-            div.innerHTML = `<div class="cart-top"><span>${item.name}</span><span>${format(sub)}</span></div>
-                <div class="cart-bottom"><span class="qty-badge">${item.qty}</span> x ${format(item.price)}
-                    <div class="no-print" style="margin-left: 10px; display:flex; gap: 5px;">
-                        <button onclick="updateQty(${i}, -1)">-</button><button onclick="updateQty(${i}, 1)">+</button>
-                    </div>
-                    <span class="btn-remove no-print" onclick="removeCart(${i})">${trashIcon}</span></div>`;
-            container.appendChild(div);
+            total += (item.price * item.qty);
+            q += item.qty;
+            const sub = document.getElementById(`subtotal-${i}`);
+            if(sub) sub.innerText = format(item.price * item.qty);
         });
         document.getElementById('totalQty').innerText = q;
         document.getElementById('grandTotal').innerText = format(total);
     }
 
-    function updateQty(i, d) { cart[i].qty += d; if(cart[i].qty <= 0) cart.splice(i,1); renderCart(); }
-    function removeCart(i) { cart.splice(i,1); renderCart(); }
+    function renderCart() {
+        const container = document.getElementById('cartContent');
+        container.innerHTML = cart.map((item, i) => `
+            <div class="cart-row">
+                <div class="cart-top"><span>${item.name}</span><span id="subtotal-${i}">${format(item.price * item.qty)}</span></div>
+                <div class="cart-bottom">
+                    <div class="qty-input-wrapper no-print">
+                        <button onclick="updateQtyBtn(${i}, -1)">-</button>
+                        <input type="number" value="${item.qty}" oninput="setQty(${i}, this.value)" onblur="renderCart()">
+                        <button onclick="updateQtyBtn(${i}, 1)">+</button>
+                    </div>
+                    <span class="no-print" style="color:#94a3b8">@ ${format(item.price)}</span>
+                    <span class="btn-remove no-print" onclick="removeCart(${i})">${trashIcon}</span>
+                </div>
+            </div>
+        `).join('');
+        updateTotalsOnly();
+    }
+
+    function updateQtyBtn(i, delta) {
+        cart[i].qty = Math.max(0, cart[i].qty + delta);
+        if(cart[i].qty === 0) removeCart(i);
+        else renderCart();
+    }
+
+    function removeCart(i) { cart.splice(i, 1); renderCart(); }
 
     function newTransaction() {
         cart = [];
-        currentTrxId = "TRX-" + Date.now().toString().slice(-6);
-        document.getElementById('trxId').innerText = currentTrxId;
-        document.getElementById('trxDate').innerText = new Date().toLocaleString('id-ID');
+        const now = new Date();
+        document.getElementById('trxId').innerText = "TRX-" + now.getTime().toString().slice(-6);
+        document.getElementById('trxDate').innerText = now.toLocaleString('id-ID');
         document.getElementById('paymentResult').style.display = 'none';
-        document.getElementById('summaryArea').style.display = 'block';
         renderCart();
     }
 
@@ -713,188 +493,70 @@
 
     function processPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        let cashRaw = document.getElementById('cashInput').value;
-        let cash = parseFloat(cashRaw.replace(/\./g, ''));
-        if(isNaN(cash)) return;
-        if(cash < total && cash > 0 && cash < 1000) cash *= 1000;
-        if(cash >= total) {
-            const now = new Date();
-            const trx = {
-                id: currentTrxId,
-                date: now.toLocaleString('id-ID'),
-                dateKey: now.toLocaleDateString('id-ID'),
-                items: JSON.parse(JSON.stringify(cart)),
-                total: total, cash: cash, change: cash - total, timestamp: now.getTime()
-            };
-            transactionHistory.unshift(trx);
-            localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
-            document.getElementById('resCash').innerText = format(cash);
-            document.getElementById('resChange').innerText = format(cash - total);
-            document.getElementById('paymentResult').style.display = 'block';
-            renderHistory();
-            closePayModal();
-        } else { alert("Nominal tunai kurang!"); }
+        let cash = parseInt(document.getElementById('cashInput').value.replace(/\./g, ''));
+        if(isNaN(cash) || cash < total) { alert("Uang kurang!"); return; }
+        document.getElementById('resCash').innerText = format(cash);
+        document.getElementById('resChange').innerText = format(cash - total);
+        document.getElementById('paymentResult').style.display = 'block';
+        transactionHistory.unshift({ id: document.getElementById('trxId').innerText, total: total, date: new Date().toLocaleTimeString() });
+        localStorage.setItem('trx_history', JSON.stringify(transactionHistory.slice(0, 50)));
+        renderHistory();
+        closePayModal();
     }
 
     function renderHistory() {
         const log = document.getElementById('trxHistoryLog');
-        log.innerHTML = "";
-        transactionHistory.slice(0, 20).forEach((trx, index) => {
-            const div = document.createElement('div');
-            div.className = "trx-card";
-            div.innerHTML = `<div class="trx-card-header"><span>${trx.id}</span><span>Rp ${format(trx.total)}</span></div>
-                <div class="trx-card-body">${trx.date}</div>
-                <div class="trx-card-footer"><button class="btn-reprint" onclick="reprintTrx(${index})">MUAT</button>
-                <span style="color:var(--danger); cursor:pointer;" onclick="deleteTrx(${index})">${trashIcon}</span></div>`;
-            log.appendChild(div);
-        });
-    }
-
-    function reprintTrx(idx) {
-        const trx = transactionHistory[idx];
-        cart = JSON.parse(JSON.stringify(trx.items));
-        currentTrxId = trx.id;
-        document.getElementById('trxId').innerText = trx.id;
-        document.getElementById('trxDate').innerText = trx.date;
-        document.getElementById('resCash').innerText = format(trx.cash);
-        document.getElementById('resChange').innerText = format(trx.change);
-        document.getElementById('paymentResult').style.display = 'block';
-        renderCart();
-    }
-
-    function deleteTrx(i) { if(confirm("Hapus?")) { transactionHistory.splice(i,1); localStorage.setItem('trx_history', JSON.stringify(transactionHistory)); renderHistory(); } }
-    function clearAllHistory() { if(confirm("Hapus semua riwayat?")) { transactionHistory=[]; localStorage.setItem('trx_history', "[]"); renderHistory(); } }
-
-    function addManual() {
-        const n = prompt("Nama Barang:").toUpperCase();
-        const p = parseFloat(prompt("Harga Satuan:"));
-        if(n && !isNaN(p)) { 
-            masterData.push({name:n, price:p}); 
-            localStorage.setItem('master_items', JSON.stringify(masterData)); 
-            renderMaster(); 
-        }
-    }
-
-    function deleteFromMaster(name) { 
-        if(confirm("Hapus "+name+" dari master?")) { 
-            masterData = masterData.filter(i=>i.name!==name); 
-            localStorage.setItem('master_items', JSON.stringify(masterData)); 
-            renderMaster(); 
-        } 
+        log.innerHTML = transactionHistory.slice(0, 5).map(t => `
+            <div style="font-size:11px; padding:8px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; background:white; margin-bottom:5px; border-radius:8px">
+                <div><div style="font-weight:bold">${t.id}</div><div style="color:#94a3b8">${t.date}</div></div>
+                <b style="color:var(--success)">Rp ${format(t.total)}</b>
+            </div>
+        `).join('');
     }
 
     function printStruk() { window.print(); }
 
-    /* KALKULATOR LOGIC */
-    function num(v) { if(currentCalc==="0") currentCalc=v; else currentCalc+=v; updateCalc(); }
-    function op(v) { currentCalc += v; updateCalc(); }
-    function clearCalc() { currentCalc="0"; updateCalc(); }
-    function backspace() { currentCalc = currentCalc.slice(0,-1) || "0"; updateCalc(); }
-    function updateCalc() { document.getElementById('calcDisplay').innerText = currentCalc; }
+    /* KALKULATOR */
+    function num(v) { if(currentCalc === "0") currentCalc = v; else currentCalc += v; updateCalc(); }
+    function clearCalc() { currentCalc = "0"; updateCalc(); }
+    function backspace() { currentCalc = currentCalc.slice(0, -1) || "0"; updateCalc(); }
+    function updateCalc() { document.getElementById('calcDisplay').innerText = format(currentCalc); }
     function addToCartManual() {
-        try { 
-            const price = eval(currentCalc); 
-            if(price > 0) { addToCart("NON-MASTER", price); clearCalc(); }
-        } catch(e) { alert("Input salah"); }
+        const price = parseInt(currentCalc);
+        if(price > 0) { addToCart("ITEM MANUAL", price); clearCalc(); }
+    }
+    
+    function addManual() {
+        const n = prompt("Nama Barang:");
+        const p = parseInt(prompt("Harga:"));
+        if(n && p) { masterData.push({name: n.toUpperCase(), price: p}); renderMaster(); localStorage.setItem('master_items', JSON.stringify(masterData)); }
     }
 
-    /* SETTINGS & REPORTS */
-    function toggleSettings() {
-        const m = document.getElementById('settingsModal');
-        const open = m.style.display === 'flex';
-        m.style.display = open ? 'none' : 'flex';
-        if(!open) { renderDailyReport(); renderSalesChart(); }
-    }
-
-    function saveSettings() {
-        const n = document.getElementById('settingShopName').value;
-        const a = document.getElementById('settingShopAddr').value;
-        localStorage.setItem('shop_name', n); localStorage.setItem('shop_addr', a);
-        document.getElementById('shopNameDisplay').innerText = n;
-        document.getElementById('shopAddrDisplay').innerText = a;
-        toggleSettings();
-    }
-
-    function renderDailyReport() {
-        const container = document.getElementById('dailyReportContainer');
-        const reports = {};
-        transactionHistory.forEach(t => {
-            reports[t.dateKey] = (reports[t.dateKey] || 0) + t.total;
-        });
-        container.innerHTML = Object.entries(reports).map(([date, total]) => 
-            `<div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;"><span>${date}</span><b>Rp ${format(total)}</b></div>`
-        ).join("");
-    }
-
-    function renderSalesChart() {
+    /* CHART LOGIC */
+    function renderChart() {
         const ctx = document.getElementById('salesChart').getContext('2d');
-        if(salesChart) salesChart.destroy();
-        const last7Days = [...Array(7)].map((_, i) => {
-            const d = new Date(); d.setDate(d.getDate() - i);
-            return d.toLocaleDateString('id-ID');
-        }).reverse();
-        const data = last7Days.map(date => {
-            return transactionHistory.filter(t => t.dateKey === date).reduce((s, t) => s + t.total, 0);
-        });
-        salesChart = new Chart(ctx, {
+        if(myChart) myChart.destroy();
+        
+        const labels = transactionHistory.slice(0, 7).reverse().map(t => t.date);
+        const data = transactionHistory.slice(0, 7).reverse().map(t => t.total);
+
+        myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: last7Days.map(d => d.split("/")[0]+"/"+d.split("/")[1]),
-                datasets: [{ label: 'Omzet 7 Hari', data: data, borderColor: '#2563eb', tension: 0.3, fill: true, backgroundColor: 'rgba(37,99,235,0.1)' }]
+                labels: labels,
+                datasets: [{
+                    label: 'Penjualan Terakhir',
+                    data: data,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
         });
     }
-
-    /* BACKUP & RESTORE LOGIC */
-    function exportData() {
-        const data = {
-            master: masterData,
-            history: transactionHistory,
-            settings: {
-                name: localStorage.getItem('shop_name'),
-                addr: localStorage.getItem('shop_addr')
-            },
-            version: "1.0",
-            exportDate: new Date().toISOString()
-        };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Backup_KasirPro_${new Date().toLocaleDateString('id-ID').replace(/\//g,'-')}.json`;
-        a.click();
-    }
-
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (confirm("Restore data akan menimpa data saat ini. Lanjutkan?")) {
-                    if(data.master) {
-                        masterData = data.master;
-                        localStorage.setItem('master_items', JSON.stringify(masterData));
-                    }
-                    if(data.history) {
-                        transactionHistory = data.history;
-                        localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
-                    }
-                    if(data.settings) {
-                        localStorage.setItem('shop_name', data.settings.name || "TOKO KITA");
-                        localStorage.setItem('shop_addr', data.settings.addr || "Alamat Toko");
-                    }
-                    alert("Restore Berhasil! Aplikasi akan memuat ulang.");
-                    location.reload();
-                }
-            } catch (err) {
-                alert("File tidak valid!");
-            }
-        };
-        reader.readAsText(file);
-    }
 </script>
+
 </body>
 </html>
