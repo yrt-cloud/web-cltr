@@ -123,18 +123,18 @@
             background: none; border: none; cursor: pointer; color: #94a3b8; padding: 5px;
         }
         .btn-settings-trigger:hover { color: var(--accent); }
-        .dashed-line { border-top: 1px dashed #bbb; margin: 10px 0; }
+        .dashed-line { border-top: 1px dashed #000; margin: 10px 0; }
         
         /* CART */
-        .cart-row { margin-bottom: 12px; padding-bottom: 5px; border-bottom: 1px solid #f1f5f9; }
+        .cart-row { margin-bottom: 8px; }
         .cart-top { display: flex; justify-content: space-between; font-weight: bold; }
-        .cart-bottom { font-size: 11px; color: #444; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .cart-bottom { font-size: 11px; color: #444; display: flex; align-items: center; gap: 8px; margin-top: 2px; }
         .qty-input-wrapper { display: flex; align-items: center; background: #f1f5f9; border-radius: 6px; padding: 2px; border: 1px solid #e2e8f0; }
         .qty-input-wrapper input { width: 40px; border: none; background: transparent; text-align: center; font-weight: bold; outline: none; }
         .qty-input-wrapper button { border: none; background: white; width: 20px; height: 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .total-large { font-size: 18px; font-weight: 900; margin-top: 8px; color: #000; }
+        .total-large { font-size: 18px; font-weight: 900; margin-top: 8px; color: #000; border-top: 1px solid #000; padding-top: 5px; }
 
         /* CALCULATOR */
         .calc-section {
@@ -170,10 +170,55 @@
         .btn-remove { color: var(--danger); cursor: pointer; margin-left: auto; }
         .btn-remove svg { width: 16px; height: 16px; fill: currentColor; }
 
+        /* PRINT STYLE - OPTIMIZED FOR 58mm THERMAL */
         @media print {
-            .no-print { display: none !important; }
-            body, .app-container { background: white; display: block; }
-            .receipt-section { border: none; width: 100%; }
+            @page {
+                size: 58mm auto;
+                margin: 0;
+            }
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+                width: 58mm;
+                display: block;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .app-container {
+                display: block;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                height: auto;
+            }
+            .receipt-section {
+                border: none;
+                width: 100%;
+                border-radius: 0;
+                margin: 0;
+            }
+            .receipt-view {
+                padding: 5mm;
+                font-size: 10pt;
+                width: 100%;
+                overflow: visible;
+                color: black;
+            }
+            .dashed-line {
+                border-top: 1px dashed black;
+            }
+            .cart-row {
+                border-bottom: none;
+            }
+            .total-large {
+                font-size: 12pt;
+                border-top: 1px dashed black;
+            }
+            h1 { font-size: 14pt; }
         }
     </style>
 </head>
@@ -336,7 +381,6 @@
         });
     }
 
-    /* SETTINGS LOGIC */
     function loadSettings() {
         const m = localStorage.getItem('master_items');
         if(m) masterData = JSON.parse(m);
@@ -400,7 +444,6 @@
         reader.readAsText(file);
     }
 
-    /* CART & MASTER LOGIC */
     function format(n) { return Number(n).toLocaleString('id-ID'); }
 
     function renderMaster(resetIdx = true) {
@@ -453,7 +496,7 @@
                         <input type="number" value="${item.qty}" oninput="setQty(${i}, this.value)" onblur="renderCart()">
                         <button onclick="updateQtyBtn(${i}, 1)">+</button>
                     </div>
-                    <span class="no-print" style="color:#94a3b8">@ ${format(item.price)}</span>
+                    <span>${item.qty} x ${format(item.price)}</span>
                     <span class="btn-remove no-print" onclick="removeCart(${i})">${trashIcon}</span>
                 </div>
             </div>
@@ -493,7 +536,8 @@
 
     function processPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        let cash = parseInt(document.getElementById('cashInput').value.replace(/\./g, ''));
+        let cashInputVal = document.getElementById('cashInput').value.replace(/\./g, '');
+        let cash = parseInt(cashInputVal);
         if(isNaN(cash) || cash < total) { alert("Uang kurang!"); return; }
         document.getElementById('resCash').innerText = format(cash);
         document.getElementById('resChange').innerText = format(cash - total);
@@ -516,7 +560,6 @@
 
     function printStruk() { window.print(); }
 
-    /* KALKULATOR */
     function num(v) { if(currentCalc === "0") currentCalc = v; else currentCalc += v; updateCalc(); }
     function clearCalc() { currentCalc = "0"; updateCalc(); }
     function backspace() { currentCalc = currentCalc.slice(0, -1) || "0"; updateCalc(); }
@@ -532,7 +575,6 @@
         if(n && p) { masterData.push({name: n.toUpperCase(), price: p}); renderMaster(); localStorage.setItem('master_items', JSON.stringify(masterData)); }
     }
 
-    /* CHART LOGIC */
     function renderChart() {
         const ctx = document.getElementById('salesChart').getContext('2d');
         if(myChart) myChart.destroy();
