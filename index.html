@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasir Pro - Grafik Penjualan</title>
+    <title>Kasir Pro - Navigasi Keyboard</title>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -108,21 +108,11 @@
             position: relative;
         }
 
+        /* Highlight warna hijau saat dipilih via keyboard atau hover */
         .master-item:hover, .master-item.selected {
-            border-color: var(--accent);
-            background: #f0f7ff;
+            border: 2px solid var(--success);
+            background: #f0fdf4;
             transform: translateX(5px);
-        }
-
-        .master-item.selected::after {
-            content: "ENTER UNTUK INPUT";
-            position: absolute;
-            right: 80px;
-            font-size: 9px;
-            background: var(--accent);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
         }
 
         .master-item-info b { font-size: 13px; text-transform: uppercase; display: block; margin-right: 60px; }
@@ -381,9 +371,9 @@
             <button class="btn" style="background: var(--success); color:white; padding: 5px 12px;" onclick="addManual()">+ BARANG</button>
         </div>
         <div class="search-container">
-            <input type="text" class="search-input" id="searchBar" placeholder="Cari / Scan barang..." oninput="renderMaster()" onkeydown="handleSearchKey(event)">
+            <input type="text" class="search-input" id="searchBar" placeholder="Cari / Scan barang..." oninput="renderMaster(true)" onkeydown="handleSearchKey(event)">
         </div>
-        <p class="search-hint">Trik: Tekan <b>[/]</b> untuk cari, <b>[Enter]</b> untuk input cepat.</p>
+        <p class="search-hint">Gunakan Panah <b>↑↓</b> dan <b>Enter</b> untuk pilih cepat.</p>
         <div class="master-list" id="masterItems"></div>
     </div>
 
@@ -550,6 +540,7 @@
     let currentTrxId = "";
     let salesChart = null;
     let filteredMaster = [];
+    let selectedIdx = 0; // Index barang yang terpilih di list
 
     function init() {
         loadFromLocal();
@@ -559,12 +550,49 @@
 
         window.addEventListener('keydown', (e) => {
             const isTyping = document.activeElement.tagName === 'INPUT';
-            if (e.key === '/' && !isTyping) { e.preventDefault(); document.getElementById('searchBar').focus(); }
+            const searchInput = document.getElementById('searchBar');
+            
+            if (e.key === '/' && !isTyping) { 
+                e.preventDefault(); 
+                searchInput.focus(); 
+            }
+
+            if (isTyping && document.activeElement === searchInput) {
+                // Navigasi Keyboard di List Barang
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (selectedIdx < filteredMaster.length - 1) {
+                        selectedIdx++;
+                        renderMaster(false);
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (selectedIdx > 0) {
+                        selectedIdx--;
+                        renderMaster(false);
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (filteredMaster.length > 0) {
+                        const item = filteredMaster[selectedIdx];
+                        addToCart(item.name, item.price);
+                        searchInput.value = "";
+                        renderMaster(true);
+                    }
+                }
+                return;
+            }
+
             if (isTyping) {
                 if (e.key === 'Enter' && document.getElementById('payModal').style.display === 'flex') processPayment();
-                if (e.key === 'Escape') { closePayModal(); if(document.getElementById('settingsModal').style.display === 'flex') toggleSettings(); }
+                if (e.key === 'Escape') { 
+                    closePayModal(); 
+                    if(document.getElementById('settingsModal').style.display === 'flex') toggleSettings(); 
+                }
                 return; 
             }
+
+            // Global Shortcuts
             if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); openPayModal(); }
             else if (e.key === 'p' || e.key === 'P') { printStruk(); }
             else if (e.key === 'r' || e.key === 'R') { resetTransaction(); }
@@ -587,29 +615,47 @@
 
     function format(n) { return Number(n).toLocaleString('id-ID'); }
 
-    function renderMaster() {
+    // renderMaster diperbarui untuk handle selection
+    function renderMaster(resetSelection = true) {
+        if(resetSelection) selectedIdx = 0;
+        
         const query = document.getElementById('searchBar').value.toLowerCase();
         const container = document.getElementById('masterItems');
         container.innerHTML = "";
-        filteredMaster = masterData.filter(i => i.name.toLowerCase().includes(query)).sort((a,b) => a.name.localeCompare(b.name));
+        
+        filteredMaster = masterData
+            .filter(i => i.name.toLowerCase().includes(query))
+            .sort((a,b) => a.name.localeCompare(b.name));
+
         filteredMaster.forEach((item, index) => {
             const div = document.createElement('div');
-            div.className = "master-item" + (query && index === 0 ? " selected" : "");
-            div.onclick = (e) => { if (!e.target.closest('.btn-delete-master')) addToCart(item.name, item.price); };
-            div.innerHTML = `<div class="master-item-info"><b>${item.name}</b><span>Rp ${format(item.price)}</span></div>
+            div.className = "master-item" + (index === selectedIdx ? " selected" : "");
+            
+            div.onclick = (e) => { 
+                if (!e.target.closest('.btn-delete-master')) {
+                    addToCart(item.name, item.price); 
+                }
+            };
+
+            div.innerHTML = `
+                <div class="master-item-info">
+                    <b>${item.name}</b>
+                    <span>Rp ${format(item.price)}</span>
+                </div>
                 <div class="btn-delete-master" onclick="deleteFromMaster('${item.name.replace(/'/g, "\\'")}')">${trashIcon}</div>
-                <div style="color: var(--success); font-size: 18px; margin-left: 10px;">+</div>`;
+                <div style="color: var(--success); font-size: 18px; margin-left: 10px; font-weight:bold;">+</div>
+            `;
             container.appendChild(div);
+
+            // Auto scroll ke item yang terpilih
+            if (index === selectedIdx) {
+                div.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
         });
     }
 
-    function handleSearchKey(e) {
-        if (e.key === 'Enter' && filteredMaster.length > 0) {
-            addToCart(filteredMaster[0].name, filteredMaster[0].price);
-            document.getElementById('searchBar').value = "";
-            renderMaster();
-        }
-    }
+    // Handle search key dihapus karena sudah dihandle di listener global (lebih stabil)
+    function handleSearchKey(e) {}
 
     function addToCart(name, price) {
         const idx = cart.findIndex(i => i.name === name);
@@ -687,7 +733,7 @@
             document.getElementById('paymentResult').style.display = 'block';
             renderHistory();
             closePayModal();
-        } else { alert("Kurang!"); }
+        } else { alert("Nominal tunai kurang!"); }
     }
 
     function renderHistory() {
@@ -720,12 +766,22 @@
     function clearAllHistory() { if(confirm("Hapus semua riwayat?")) { transactionHistory=[]; localStorage.setItem('trx_history', "[]"); renderHistory(); } }
 
     function addManual() {
-        const n = prompt("Nama:").toUpperCase();
-        const p = parseFloat(prompt("Harga:"));
-        if(n && !isNaN(p)) { masterData.push({name:n, price:p}); localStorage.setItem('master_items', JSON.stringify(masterData)); renderMaster(); }
+        const n = prompt("Nama Barang:").toUpperCase();
+        const p = parseFloat(prompt("Harga Satuan:"));
+        if(n && !isNaN(p)) { 
+            masterData.push({name:n, price:p}); 
+            localStorage.setItem('master_items', JSON.stringify(masterData)); 
+            renderMaster(); 
+        }
     }
 
-    function deleteFromMaster(name) { if(confirm("Hapus "+name+"?")) { masterData = masterData.filter(i=>i.name!==name); localStorage.setItem('master_items', JSON.stringify(masterData)); renderMaster(); } }
+    function deleteFromMaster(name) { 
+        if(confirm("Hapus "+name+" dari master?")) { 
+            masterData = masterData.filter(i=>i.name!==name); 
+            localStorage.setItem('master_items', JSON.stringify(masterData)); 
+            renderMaster(); 
+        } 
+    }
 
     function printStruk() { window.print(); }
 
