@@ -88,6 +88,7 @@
             border-radius: 10px;
             cursor: pointer;
             transition: 0.2s;
+            position: relative;
         }
         .master-item:hover, .master-item.selected {
             border: 2px solid var(--success);
@@ -97,6 +98,27 @@
         .master-item-info b { font-size: 13px; text-transform: uppercase; display: block; }
         .master-item-info span { font-size: 12px; color: var(--accent); font-weight: 600; }
         
+        /* Tombol Hapus di Master Barang */
+        .btn-delete-master {
+            padding: 8px;
+            color: #94a3b8;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        .btn-delete-master:hover {
+            color: var(--danger);
+            background: #fef2f2;
+            transform: scale(1.1);
+        }
+        .btn-delete-master svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
         /* STRUK AREA */
         .receipt-section {
             flex: 0 0 350px;
@@ -172,78 +194,20 @@
 
         /* PRINT STYLE - OPTIMIZED FOR 58mm THERMAL */
         @media print {
-            @page {
-                size: 58mm auto;
-                margin: 0;
-            }
-            body {
-                background: white;
-                margin: 0;
-                padding: 0;
-                width: 58mm;
-                display: block;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .app-container {
-                display: block;
-                width: 100%;
-                max-width: 100%;
-                margin: 0;
-                padding: 0;
-                box-shadow: none;
-                height: auto;
-            }
-            .receipt-section {
-                border: none;
-                width: 100%;
-                border-radius: 0;
-                margin: 0;
-                display: block;
-            }
-            .receipt-view {
-                padding: 2mm;
-                font-size: 9pt;
-                width: 100%;
-                overflow: visible;
-                color: black;
-                line-height: 1.2; /* Menghindari tumpang tindih antar baris */
-            }
-            .thermal-header {
-                margin-bottom: 4mm;
-            }
-            .thermal-header h1 {
-                font-size: 12pt;
-                margin-bottom: 1mm;
-                display: block; /* Memastikan baris baru */
-            }
-            .thermal-header p {
-                font-size: 8pt;
-                margin: 0;
-                display: block;
-                word-wrap: break-word; /* Alamat panjang akan turun ke bawah, tidak menumpuk */
-            }
-            .dashed-line {
-                border-top: 1px dashed black;
-                margin: 2mm 0;
-            }
-            .cart-row {
-                border-bottom: none;
-                margin-bottom: 1mm;
-            }
-            .cart-top {
-                font-size: 9pt;
-            }
-            .cart-bottom {
-                font-size: 8pt;
-            }
-            .total-large {
-                font-size: 11pt;
-                border-top: 1px dashed black;
-                margin-top: 2mm;
-                padding-top: 1mm;
-            }
+            @page { size: 58mm auto; margin: 0; }
+            body { background: white; margin: 0; padding: 0; width: 58mm; display: block; }
+            .no-print { display: none !important; }
+            .app-container { display: block; width: 100%; max-width: 100%; margin: 0; padding: 0; box-shadow: none; height: auto; }
+            .receipt-section { border: none; width: 100%; border-radius: 0; margin: 0; display: block; }
+            .receipt-view { padding: 2mm; font-size: 9pt; width: 100%; overflow: visible; color: black; line-height: 1.2; }
+            .thermal-header { margin-bottom: 4mm; }
+            .thermal-header h1 { font-size: 12pt; margin-bottom: 1mm; display: block; }
+            .thermal-header p { font-size: 8pt; margin: 0; display: block; word-wrap: break-word; }
+            .dashed-line { border-top: 1px dashed black; margin: 2mm 0; }
+            .cart-row { border-bottom: none; margin-bottom: 1mm; }
+            .cart-top { font-size: 9pt; }
+            .cart-bottom { font-size: 8pt; }
+            .total-large { font-size: 11pt; border-top: 1px dashed black; margin-top: 2mm; padding-top: 1mm; }
             h1 { font-size: 12pt; }
         }
     </style>
@@ -322,7 +286,6 @@
 <div class="modal-overlay" id="settingsModal">
     <div class="modal-content">
         <div class="modal-title">PENGATURAN TOKO & LAPORAN</div>
-        
         <div class="input-group">
             <label>NAMA TOKO</label>
             <input type="text" class="modal-input" id="setShopName">
@@ -331,16 +294,13 @@
             <label>ALAMAT TOKO</label>
             <input type="text" class="modal-input" id="setShopAddr">
         </div>
-
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
             <button class="btn" style="flex:1; background:var(--dark); color:white; font-size:12px" onclick="exportData()">DOWNLOAD BACKUP</button>
             <button class="btn" style="flex:1; background:var(--accent); color:white; font-size:12px" onclick="document.getElementById('importFile').click()">RESTORE DATA</button>
             <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
         </div>
-
         <div style="font-weight:bold; font-size:12px; margin-bottom:10px; color:var(--dark)">RINGKASAN PENJUALAN</div>
         <canvas id="salesChart" width="400" height="200" style="margin-bottom:20px"></canvas>
-
         <div style="display: flex; gap: 10px;">
             <button class="btn" style="flex:1" onclick="toggleSettings()">BATAL</button>
             <button class="btn" style="flex:1; background:var(--success); color:white;" onclick="saveSettings()">SIMPAN PERUBAHAN</button>
@@ -377,7 +337,8 @@
     let filteredMaster = [];
     let myChart = null;
 
-    const trashIcon = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+    // Definisikan ikon sampah SVG di sini
+    const trashIcon = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
 
     function init() {
         loadSettings();
@@ -412,10 +373,8 @@
         if(m) masterData = JSON.parse(m);
         const h = localStorage.getItem('trx_history');
         if(h) transactionHistory = JSON.parse(h);
-        
         const name = localStorage.getItem('shop_name') || "TOKO KITA";
         const addr = localStorage.getItem('shop_addr') || "Jl. Sudirman No. 123";
-        
         document.getElementById('shopNameDisplay').innerText = name;
         document.getElementById('shopAddrDisplay').innerText = addr;
         document.getElementById('setShopName').value = name;
@@ -430,10 +389,8 @@
     }
 
     function saveSettings() {
-        const name = document.getElementById('setShopName').value;
-        const addr = document.getElementById('setShopAddr').value;
-        localStorage.setItem('shop_name', name);
-        localStorage.setItem('shop_addr', addr);
+        localStorage.setItem('shop_name', document.getElementById('setShopName').value);
+        localStorage.setItem('shop_addr', document.getElementById('setShopAddr').value);
         loadSettings();
         toggleSettings();
     }
@@ -443,9 +400,7 @@
         const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `backup_kasir_${Date.now()}.json`;
-        a.click();
+        a.href = url; a.download = `backup_kasir_${Date.now()}.json`; a.click();
     }
 
     function importData(e) {
@@ -455,16 +410,9 @@
         reader.onload = (event) => {
             try {
                 const data = JSON.parse(event.target.result);
-                if(data.master) {
-                    masterData = data.master;
-                    localStorage.setItem('master_items', JSON.stringify(masterData));
-                }
-                if(data.history) {
-                    transactionHistory = data.history;
-                    localStorage.setItem('trx_history', JSON.stringify(transactionHistory));
-                }
-                alert("Data berhasil dipulihkan!");
-                location.reload();
+                if(data.master) { masterData = data.master; localStorage.setItem('master_items', JSON.stringify(masterData)); }
+                if(data.history) { transactionHistory = data.history; localStorage.setItem('trx_history', JSON.stringify(transactionHistory)); }
+                alert("Data berhasil dipulihkan!"); location.reload();
             } catch(err) { alert("Format file tidak valid."); }
         };
         reader.readAsText(file);
@@ -477,12 +425,35 @@
         const q = document.getElementById('searchBar').value.toLowerCase();
         filteredMaster = masterData.filter(i => i.name.toLowerCase().includes(q));
         const container = document.getElementById('masterItems');
-        container.innerHTML = filteredMaster.map((item, i) => `
-            <div class="master-item ${i === selectedIdx ? 'selected' : ''}" onclick="addToCart('${item.name}', ${item.price})">
+        container.innerHTML = filteredMaster.map((item, i) => {
+            // Kita cari index asli di masterData untuk keperluan penghapusan
+            const originalIndex = masterData.findIndex(orig => orig.name === item.name && orig.price === item.price);
+            return `
+            <div class="master-item ${i === selectedIdx ? 'selected' : ''}" onclick="handleMasterClick(event, '${item.name}', ${item.price})">
                 <div class="master-item-info"><b>${item.name}</b><span>Rp ${format(item.price)}</span></div>
-                <div style="font-weight:bold; color:var(--success)">+</div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <div class="btn-delete-master" onclick="deleteMasterItem(event, ${originalIndex})" title="Hapus dari data barang">
+                        ${trashIcon}
+                    </div>
+                    <div style="font-weight:bold; color:var(--success); padding: 8px;">+</div>
+                </div>
             </div>
-        `).join('');
+        `}).join('');
+    }
+
+    function handleMasterClick(event, name, price) {
+        if (event.target.closest('.btn-delete-master')) return;
+        addToCart(name, price);
+    }
+
+    function deleteMasterItem(event, index) {
+        event.stopPropagation();
+        const itemName = masterData[index].name;
+        if (confirm(`Hapus "${itemName}" dari database secara permanen?`)) {
+            masterData.splice(index, 1);
+            localStorage.setItem('master_items', JSON.stringify(masterData));
+            renderMaster(false);
+        }
     }
 
     function addToCart(name, price) {
@@ -562,27 +533,15 @@
 
     function processPayment() {
         const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-        let cashRaw = document.getElementById('cashInput').value.replace(/\./g, '').replace(/,/g, '');
-        let cash = parseInt(cashRaw);
-
-        // LOGIKA PENYEDERHANAAN INPUT (Sesuai Permintaan)
-        // Jika input 40 -> 40.000, 400 -> 400.000
-        if (!isNaN(cash) && cash > 0 && cash < 1000) {
-            cash = cash * 1000;
-        }
-
-        if(isNaN(cash) || cash < total) { 
-            alert("Uang kurang! Masukkan minimal " + format(total)); 
-            return; 
-        }
-
+        let cash = parseInt(document.getElementById('cashInput').value.replace(/\./g, '').replace(/,/g, ''));
+        if (!isNaN(cash) && cash > 0 && cash < 1000) cash = cash * 1000;
+        if(isNaN(cash) || cash < total) { alert("Uang kurang!"); return; }
         document.getElementById('resCash').innerText = format(cash);
         document.getElementById('resChange').innerText = format(cash - total);
         document.getElementById('paymentResult').style.display = 'block';
         transactionHistory.unshift({ id: document.getElementById('trxId').innerText, total: total, date: new Date().toLocaleTimeString() });
         localStorage.setItem('trx_history', JSON.stringify(transactionHistory.slice(0, 50)));
-        renderHistory();
-        closePayModal();
+        renderHistory(); closePayModal();
     }
 
     function renderHistory() {
@@ -611,27 +570,24 @@
         const pStr = prompt("Harga:");
         if (n && pStr) {
             let p = parseInt(pStr);
-            // Juga terapkan logika k di input barang baru agar cepat
             if(p < 1000) p = p * 1000;
             masterData.push({name: n.toUpperCase(), price: p}); 
+            localStorage.setItem('master_items', JSON.stringify(masterData));
             renderMaster(); 
-            localStorage.setItem('master_items', JSON.stringify(masterData)); 
         }
     }
 
     function renderChart() {
         const ctx = document.getElementById('salesChart').getContext('2d');
         if(myChart) myChart.destroy();
-        
         const labels = transactionHistory.slice(0, 7).reverse().map(t => t.date);
         const data = transactionHistory.slice(0, 7).reverse().map(t => t.total);
-
         myChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Penjualan Terakhir',
+                    label: 'Penjualan',
                     data: data,
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.1)',
@@ -643,6 +599,5 @@
         });
     }
 </script>
-
 </body>
 </html>
